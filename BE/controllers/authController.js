@@ -1,110 +1,177 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const { sendOTPEmail } = require('../services/otpMailService');
+const authService = require('../services/authService');
+require('dotenv').config();
 
-// Đăng ký người dùng
 const register = async (req, res) => {
-  const { email, phone, password, name, role } = req.body;
-
   try {
-    // Kiểm tra email đã tồn tại chưa
+    const { email, password, name, role, phone } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already exists' });
+      return res.status(400).json({
+        success: false,
+        message: 'Email đã được sử dụng'
+      });
     }
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Mã hóa mật khẩu
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Tạo người dùng mới
     const user = new User({
       email,
-      phone,
       password: hashedPassword,
       name,
-      role: role || 'customer', // Mặc định là customer nếu không truyền role
+      role: role || 'customer',
+      phone,
+      status: 'pending',
+      isEmailVerified: false
     });
-
     await user.save();
 
-    res.status(201).json({ message: 'User registered successfully' });
+    // Gửi OTP qua email với template xác thực tài khoản
+    const expiryMinutes = 10;
+    const { success, otp, expiryTime } = await sendOTPEmail(email, name, 6, expiryMinutes, 'verify');
+    if (!success) {
+      return res.status(500).json({
+        success: false,
+        message: 'Không thể gửi OTP, vui lòng thử lại',
+        error: 'Email sending failed'
+      });
+    }
+
+    // Cập nhật user với mã OTP và thời gian hết hạn
+    user.emailVerificationCode = otp;
+    user.emailVerificationExpires = expiryTime;
+    await user.save();
+
+    return res.status(201).json({
+      success: true,
+      message: 'Đăng ký thành công! Vui lòng kiểm tra email để nhận OTP xác thực.',
+      userId: user._id
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Error registering user', error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: 'Error',
+      error: error.message
+    });
   }
 };
 
-// Đăng nhập người dùng
-const login = async (req, res) => {
-  const { email, password } = req.body;
+// check OTP
+const validateOtp = (user, verificationCode) => {
+  if (!user.emailVerificationCode || !user.emailVerificationExpires) {
+    return { valid: false, message: 'Mã OTP chưa được tạo' };
+  }
+  if (user.emailVerificationCode !== verificationCode) {
+    return { valid: false, message: 'Mã OTP không đúng' };
+  }
+  if (user.emailVerificationExpires < new Date()) {
+    return { valid: false, message: 'Mã OTP đã hết hạn' };
+  }
+  return { valid: true };
+};
 
+const verifyOtp = async (req, res) => {
   try {
-    // Tìm người dùng theo email
+    console.log('Verify OTP request body:', req.body);
+    const { email, verificationCode } = req.body;
+
+    // Tìm user
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+      return res.status(404).json({
+        success: false,
+        message: 'Người dùng không tồn tại'
+      });
     }
 
-    // Kiểm tra mật khẩu
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid email or password' });
+    const { valid, message } = validateOtp(user, verificationCode);
+    if (!valid) {
+      return res.status(400).json({
+        success: false,
+        message
+      });
     }
 
-    // Tạo access token và refresh token
-    const accessToken = jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
-    });
-
-    const refreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN,
-    });
-
-    // Cập nhật thời gian đăng nhập cuối
-    user.lastLogin = new Date();
+    user.status = 'active';
+    user.isEmailVerified = true;
+    user.emailVerificationCode = undefined;
+    user.emailVerificationExpires = undefined;
     await user.save();
 
-    res.status(200).json({
-      message: 'Login successful',
-      accessToken,
-      refreshToken,
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-      },
+    return res.status(200).json({
+      success: true,
+      message: 'Xác minh OTP thành công! Tài khoản đã được kích hoạt.'
     });
   } catch (error) {
-    res.status(500).json({ message: 'Error logging in', error: error.message });
+    console.error('Error in verifyOtp:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Lỗi hệ thống',
+      error: error.message
+    });
   }
 };
 
-const refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
-
-  if (!refreshToken) {
-    return res.status(401).json({ message: 'Refresh token is required' });
-  }
-
+const login = async (req, res) => {
   try {
-    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
-    const user = await User.findById(decoded.id);
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
-    }
+    const { email, password } = req.body;
+    const data = await authService.login(email, password);
 
-    // Tạo access token mới
-    const newAccessToken = jwt.sign({ id: user._id, role: user.role }, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
-    });
-
-    res.status(200).json({
-      message: 'Token refreshed successfully',
-      accessToken: newAccessToken,
+    return res.status(200).json({
+      success: true,
+      message: 'Đăng nhập thành công',
+      data
     });
   } catch (error) {
-    res.status(403).json({ message: 'Invalid or expired refresh token', error: error.message });
+    console.error('Error in login:', error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Lỗi hệ thống'
+    });
   }
 };
 
-module.exports = { register, login, refreshToken };
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const result = await authService.forgotPassword(email);
+    return res.status(200).json({
+      success: true,
+      message: result.message,
+      messageId: result.messageId
+    });
+  } catch (error) {
+    console.error('Error in forgotPassword:', error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Lỗi hệ thống'
+    });
+  }
+};
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, resetCode, newPassword } = req.body;
+    const result = await authService.resetPassword(email, resetCode, newPassword);
+    return res.status(200).json({
+      success: true,
+      message: result.message
+    });
+  } catch (error) {
+    console.error('Error in resetPassword:', error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Lỗi hệ thống'
+    });
+  }
+};
+
+module.exports = {
+  register,
+  verifyOtp,
+  login,
+  forgotPassword,
+  resetPassword
+};
