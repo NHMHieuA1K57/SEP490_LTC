@@ -6,7 +6,12 @@ const { registerValidation,
      loginValidation, 
      forgotPasswordValidation, 
      resetPasswordValidation } = require('../validations/authValidation');
-console.log('authRoutes loaded');
+
+const{ authMiddleware,roleMiddleware} = require('../middleware/authMiddleware');
+const upload = require('../controllers/upload');
+
+
+
 // Đăng ký tài khoản
 router.post('/register', registerValidation, authController.register);
 // Xác minh OTP
@@ -17,4 +22,9 @@ router.post('/login', loginValidation ,authController.login);
 router.post('/forgot-password', forgotPasswordValidation, authController.forgotPassword);
 // Đặt lại mật khẩu
 router.post('/reset-password', resetPasswordValidation, authController.resetPassword);
+// profile
+router.get('/profile', authMiddleware, roleMiddleware(['customer', 'hotel_owner', 'tour_provider']), authController.getProfile);
+router.put('/update-profile', authMiddleware, roleMiddleware(['customer', 'hotel_owner', 'tour_provider']), 
+upload.array('avatar', 1),
+ authController.updateProfile);
 module.exports = router;

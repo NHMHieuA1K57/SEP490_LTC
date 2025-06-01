@@ -1,4 +1,21 @@
 const User = require('../models/User');
+const LoyaltyPoints = require('../models/LoyaltyPoints');
+
+const findUserById = async (userId) => {
+  return await User.findById(userId).select('email phone name profile');
+};
+
+const findLoyaltyPointsByUserId = async (userId) => {
+  return await LoyaltyPoints.findOne({ userId }).select('points history');
+};
+
+const updateUserProfile = async (userId, updates) => {
+  return await User.findByIdAndUpdate(
+    userId,
+    { $set: updates },
+    { new: true, runValidators: true }
+  ).select('email phone name profile');
+};
 
 const findUserByEmail = async (email) => {
   return await User.findOne({ email: email.toLowerCase() });
@@ -24,6 +41,9 @@ const updatePassword = async (user, hashedPassword) => {
 };
 
 module.exports = {
+  findUserById,
+  findLoyaltyPointsByUserId,
+  updateUserProfile,
   findUserByEmail,
   saveRefreshToken,
   saveResetPasswordCode,

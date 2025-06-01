@@ -25,7 +25,8 @@ const UserSchema = new Schema({
   resetPasswordCode: { type: String },
   resetPasswordExpires: { type: Date },
   createdAt: { type: Date, default: Date.now },
-  lastLogin: { type: Date }
+  lastLogin: { type: Date },
+  refreshToken: String
 }, { timestamps: true });
 
 // Indexes

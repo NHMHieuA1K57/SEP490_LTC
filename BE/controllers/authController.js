@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { sendOTPEmail } = require('../services/otpMailService');
 const authService = require('../services/authService');
+const LoyaltyPoints = require('../models/LoyaltyPoints');
 require('dotenv').config();
 
 const register = async (req, res) => {
@@ -28,7 +29,16 @@ const register = async (req, res) => {
     });
     await user.save();
 
-    // Gửi OTP qua email với template xác thực tài khoản
+    if (user.role === 'customer') {
+      const loyaltyPoints = new LoyaltyPoints({
+        userId: user._id,
+        points: 0,
+        history: []
+      });
+      await loyaltyPoints.save();
+    }
+
+    // send OTP email
     const expiryMinutes = 10;
     const { success, otp, expiryTime } = await sendOTPEmail(email, name, 6, expiryMinutes, 'verify');
     if (!success) {
@@ -74,7 +84,7 @@ const validateOtp = (user, verificationCode) => {
 
 const verifyOtp = async (req, res) => {
   try {
-    console.log('Verify OTP request body:', req.body);
+    // console.log('Verify OTP request body:', req.body);
     const { email, verificationCode } = req.body;
 
     // Tìm user
@@ -167,11 +177,52 @@ const resetPassword = async (req, res) => {
     });
   }
 };
+const getProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const profile = await authService.getProfile(userId);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Lấy thông tin hồ sơ thành công',
+      data: profile
+    });
+  } catch (error) {
+    console.error('Error in getProfile:', error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Lỗi hệ thống'
+    });
+  }
+};
+
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const updates = req.body;
+    const files = req.files;
+    const updatedProfile = await authService.updateProfile(userId, updates, files);
+    return res.status(200).json({
+      success: true,
+      message: 'Cập nhật thông tin cá nhân thành công',
+      data: updatedProfile
+    });
+  } catch (error) {
+    console.error('Error in updateProfile:', error);
+    return res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'Lỗi hệ thống'
+    });
+  }
+};
+
 
 module.exports = {
   register,
   verifyOtp,
   login,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getProfile,
+  updateProfile
 };

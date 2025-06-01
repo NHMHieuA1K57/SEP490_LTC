@@ -1,7 +1,9 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { findUserByEmail, saveRefreshToken, saveResetPasswordCode, updatePassword } = require('../repositories/userRepository');
+const { findUserByEmail, saveRefreshToken, saveResetPasswordCode, 
+  updatePassword, findUserById, findLoyaltyPointsByUserId, updateUserProfile } = require('../repositories/userRepository');
 const { sendOTPEmail } = require('./otpMailService');
+const cloudinary = require('../config/cloudinary');
 require('dotenv').config();
 
 const login = async (email, password) => {
@@ -93,8 +95,85 @@ const resetPassword = async (email, resetCode, newPassword) => {
   return { message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.' };
 };
 
+const getProfile = async (userId) => {
+  const user = await findUserById(userId);
+  if (!user) {
+    throw { status: 404, message: 'Người dùng không tồn tại' };
+  }
+
+  const loyaltyPoints = await findLoyaltyPointsByUserId(userId);
+  if (!loyaltyPoints && user.role === 'customer') {
+    throw { status: 404, message: 'Điểm tích lũy không tồn tại' };
+  }
+
+  return {
+    email: user.email,
+    phone: user.phone,
+    name: user.name,
+    address: user.profile.address,
+    dateOfBirth: user.profile.dateOfBirth,
+    avatar: user.profile.avatar,
+    loyaltyPoints: loyaltyPoints ? {
+      points: loyaltyPoints.points,
+      history: loyaltyPoints.history
+    } : null
+  };
+};
+
+const updateProfile = async (userId, updates, files) => {
+  const profileUpdates = {};
+    if (updates.name) profileUpdates.name = updates.name;
+  if (updates.address) profileUpdates['profile.address'] = updates.address;
+  if (updates.dateOfBirth) profileUpdates['profile.dateOfBirth'] = updates.dateOfBirth;
+
+  if (files && files.length > 0) {
+    const file = files[0];
+
+    try {
+      const result = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'SEP490/avatars', 
+            resource_type: 'image'
+          },
+          (error, result) => {
+            if (error) {
+              console.error('Cloudinary upload error:', error);
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          }
+        );
+        stream.end(file.buffer);
+      });
+
+      profileUpdates['profile.avatar'] = result.secure_url;
+
+    } catch (error) {
+      console.error('Upload error details:', error);
+      throw { status: 500, message: 'Lỗi khi upload ảnh lên Cloudinary' };
+    }
+  }
+  profileUpdates['profile.updatedAt'] = new Date();
+  const updatedUser = await updateUserProfile(userId, profileUpdates);
+  if (!updatedUser) {
+    throw { status: 404, message: 'Người dùng không tồn tại' };
+  }
+  return {
+    email: updatedUser.email,
+    phone: updatedUser.phone,
+    name: updatedUser.name,
+    address: updatedUser.profile.address,
+    dateOfBirth: updatedUser.profile.dateOfBirth,
+    avatar: updatedUser.profile.avatar
+  };
+};
+
 module.exports = {
   login,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  getProfile,
+  updateProfile
 };
