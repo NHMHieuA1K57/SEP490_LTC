@@ -26,13 +26,13 @@ const login = async (email, password) => {
   }
 
   const accessToken = jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, role: user.role, email: user.email },
     process.env.ACCESS_TOKEN_SECRET,
     { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN }
   );
 
   const refreshToken = jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user._id, email: user.email },
     process.env.REFRESH_TOKEN_SECRET,
     { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
   );
@@ -41,15 +41,23 @@ const login = async (email, password) => {
 
   return {
     accessToken,
-    refreshToken,
     user: {
       id: user._id,
       email: user.email,
       name: user.name,
-      role: user.role
-    }
+      role: user.role,
+    },
+    setCookie: (res) => {
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'Strict',
+        maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN) * 1000,
+      });
+    },
   };
 };
+
 
 const forgotPassword = async (email) => {
   const user = await findUserByEmail(email);

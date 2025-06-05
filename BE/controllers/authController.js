@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
+const jwt = require('jsonwebtoken');
 const { sendOTPEmail } = require('../services/otpMailService');
 const authService = require('../services/authService');
 const LoyaltyPoints = require('../models/LoyaltyPoints');
+const { findUserByEmail, saveRefreshToken } = require('../repositories/userRepository');
 require('dotenv').config();
 
 const register = async (req, res) => {
@@ -129,16 +131,21 @@ const login = async (req, res) => {
     const { email, password } = req.body;
     const data = await authService.login(email, password);
 
+    data.setCookie(res);
+
     return res.status(200).json({
       success: true,
       message: 'Đăng nhập thành công',
-      data
+      data: {
+        accessToken: data.accessToken,
+        user: data.user,
+      },
     });
   } catch (error) {
     console.error('Error in login:', error);
     return res.status(error.status || 500).json({
       success: false,
-      message: error.message || 'Lỗi hệ thống'
+      message: error.message || 'Lỗi hệ thống',
     });
   }
 };
@@ -216,6 +223,60 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const logout = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    await User.updateOne({ _id: userId }, { refreshToken: null });
+    res.clearCookie('refreshToken');
+    return res.status(200).json({ success: true, message: 'Đăng xuất thành công' });
+  } catch (error) {
+    console.error('Logout error:', error);
+    return res.status(500).json({ success: false, message: 'Lỗi hệ thống' });
+  }
+};
+
+const refreshToken = async (req, res) => {
+  try {
+    const refreshToken = req.body.refreshToken || req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ success: false, message: 'Refresh token is required' });
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const user = await findUserByEmail(decoded.email);
+    if (!user || user.refreshToken !== refreshToken) {
+      return res.status(403).json({ success: false, message: 'Invalid refresh token' });
+    }
+
+    const newAccessToken = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN }
+    );
+
+    const newRefreshToken = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN }
+    );
+    await saveRefreshToken(user, newRefreshToken);
+
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+      maxAge: parseInt(process.env.REFRESH_TOKEN_EXPIRES_IN) * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      accessToken: newAccessToken,
+    });
+  } catch (error) {
+    console.error('Refresh token error:', error.message);
+    return res.status(403).json({ success: false, message: 'Invalid or expired refresh token' });
+  }
+};
 
 module.exports = {
   register,
@@ -224,5 +285,7 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getProfile,
-  updateProfile
+  updateProfile,
+  logout,
+  refreshToken
 };
