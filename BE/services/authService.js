@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { findUserByEmail, updatePassword, findUserById, findLoyaltyPointsByUserId, updateUserProfile } = require('../repositories/userRepository');
+const { findUserByEmail, updatePassword, findUserById, findLoyaltyPointsByUserId, updateUserProfile } = require('../repositories/authRepository');
 const { sendOTPEmail } = require('./otpMailService');
 const cloudinary = require('../config/cloudinary');
 const LoyaltyPoints = require('../models/LoyaltyPoints');

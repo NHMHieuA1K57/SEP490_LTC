@@ -1,5 +1,5 @@
 const authService = require('../services/authService');
-const { findUserByEmail } = require('../repositories/userRepository');
+const { findUserByEmail } = require('../repositories/authRepository');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 

@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const UserRepository = require('../repositories/userRepository');
+const UserRepository = require('../repositories/authRepository');
 const cloudinary = require('../config/cloudinary');
 
 const registerBusinessUserService = async (data, file) => {
@@ -42,6 +42,8 @@ const registerBusinessUserService = async (data, file) => {
     businessType: role,
     status: 'pending',
     isBusinessVerified: false,
+    isBusinessVerified: false,
+    isEmailVerified: ['hotel_owner', 'tour_provider'].includes(role),
     createdAt: new Date() 
   };
 
