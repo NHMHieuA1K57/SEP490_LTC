@@ -6,8 +6,8 @@ const httpErrors = require("http-errors");
 const db = require("./config/db");
 const session = require('express-session');
 const authRoutes = require('./routes/authRoutes');
-
-
+const BusinessUserRoutes = require('./routes/businessUserRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 const app = express();
 
 // Middleware
@@ -35,6 +35,8 @@ app.use(session({
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/business-user', BusinessUserRoutes);
+app.use('/api/admin', adminRoutes);
 
 app.get('/', (req, res) => {
     res.status(200).json({

@@ -21,15 +21,7 @@ const UserSchema = new Schema({
   googleId: { type: String, sparse: true },
   status: { type: String, enum: ['active', 'pending', 'banned'], default: 'pending' },
   isEmailVerified: { type: Boolean, default: false },
-  emailVerificationCode: { type: String },
-  emailVerificationExpires: { type: Date },
-  resetPasswordCode: { type: String },
-  resetPasswordExpires: { type: Date },
   createdAt: { type: Date, default: Date.now },
-  lastLogin: { type: Date },
-  refreshToken: { type: String },
-  refreshTokenExpires: { type: Date },
-  isRefreshTokenRevoked: { type: Boolean, default: false },
   businessType: { 
     type: String, 
     enum: ['hotel_owner', 'tour_provider'], 
@@ -55,8 +47,6 @@ UserSchema.pre('save', function(next) {
 
 // Indexes
 UserSchema.index({ role: 1 });
-UserSchema.index({ emailVerificationExpires: 1 }, { expireAfterSeconds: 0 });
-UserSchema.index({ resetPasswordExpires: 1 }, { expireAfterSeconds: 0 });
 UserSchema.index({ lastLogin: 1 });
 
 module.exports = mongoose.model('User', UserSchema);

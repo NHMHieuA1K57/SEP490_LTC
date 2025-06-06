@@ -13,17 +13,28 @@ const validate = (req, res, next) => {
   next();
 };
 
-// Register validation rules
+// Register validation rules (Updated to make role optional)
 const registerValidation = [
   body('email')
-    .notEmpty()
-    .withMessage('Email không được để trống')
-    .isEmail()
-    .normalizeEmail()
-    .withMessage('Email không hợp lệ')
-    .isLength({ max: 255 })
-    .withMessage('Email quá dài'),
+  .optional()
+  .isEmail()
+  .withMessage('Email không hợp lệ')
+  .normalizeEmail()
+  .isLength({ max: 255 })
+  .withMessage('Email quá dài'),
 
+body('phone')
+  .optional()
+  .isMobilePhone('vi-VN')
+  .withMessage('Số điện thoại không hợp lệ'),
+
+body()
+  .custom((value) => {
+    if (!value.email && !value.phone) {
+      throw new Error('Phải nhập email hoặc số điện thoại');
+    }
+    return true;
+  }),
   body('password')
     .notEmpty()
     .withMessage('Mật khẩu không được để trống')
@@ -42,14 +53,17 @@ const registerValidation = [
     .withMessage('Tên chỉ được chứa chữ cái và khoảng trắng'),
 
   body('role')
-    .optional()
+    .optional() // Make role optional
     .isIn(['customer', 'hotel_owner', 'tour_provider'])
     .withMessage('Role không hợp lệ'),
 
-  body('phone')
+  body('taxId') // Added for business users
     .optional()
-    .isMobilePhone('vi-VN')
-    .withMessage('Số điện thoại không hợp lệ'),
+    .trim()
+    .isLength({ min: 10, max: 13 })
+    .withMessage('Mã số thuế phải có từ 10-13 ký tự')
+    .matches(/^[0-9\-]+$/)
+    .withMessage('Mã số thuế chỉ được chứa số và dấu gạch ngang'),
 
   validate
 ];
@@ -148,6 +162,7 @@ const updateProfileValidation = [
 
   validate
 ];
+
 // Forgot Password validation rules
 const forgotPasswordValidation = [
   body('email')
@@ -183,6 +198,20 @@ const resetPasswordValidation = [
   validate
 ];
 
+// Admin Verify Business User validation rules
+const verifyBusinessValidation = [
+  body('userId')
+    .notEmpty()
+    .withMessage('User ID không được để trống')
+    .isMongoId()
+    .withMessage('User ID không hợp lệ'),
+  body('approve')
+    .notEmpty()
+    .withMessage('Trạng thái phê duyệt không được để trống')
+    .isBoolean()
+    .withMessage('Trạng thái phê duyệt phải là true hoặc false'),
+  validate
+];
 
 module.exports = {
   registerValidation,
@@ -192,5 +221,6 @@ module.exports = {
   changePasswordValidation,
   updateProfileValidation,
   forgotPasswordValidation,
-  resetPasswordValidation
+  resetPasswordValidation,
+  verifyBusinessValidation
 };
