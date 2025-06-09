@@ -1,198 +1,142 @@
 .featured-hotels {
-  background: #f8f9fa;
-}
+  padding: 80px 0;
+  background-color: #f9fafb;
 
-.section-header {
-  text-align: center;
-  margin-bottom: 50px; // Giảm margin
-}
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
 
-.section-title {
-  font-size: 3rem;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 16px;
-}
-
-.section-subtitle {
-  font-size: 23px;
-  color: #666;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-.hotel-card {
-  background: white;
-  border-radius: 16px; // Giảm border radius
-  overflow: hidden;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
-  height: 100%;
-  min-height: 400px; // Giảm min-height
-
-  &:hover {
-    transform: translateY(-8px); // Giảm transform
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
-  }
-
-  &__badge {
-    position: absolute;
-    top: 16px; // Giảm top
-    left: 16px; // Giảm left
-    color: white;
-    padding: 6px 12px; // Giảm padding
-    border-radius: 20px;
-    font-size: 17px;
-    font-weight: 600;
-    z-index: 2;
-
-    &--best-seller {
-      background: #ff6b6b;
-    }
-
-    &--most-popular {
-      background: #4ecdc4;
-    }
-
-    &--luxury {
-      background: #ffd700;
-      color: #333;
-    }
-
-    &--great-value {
-      background: #51cf66;
-    }
-
-    &--exotic {
-      background: #9775fa;
-    }
-  }
-
-  &__image {
-    height: 200px; // Giảm height
-    overflow: hidden;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s ease;
-    }
-  }
-
-  &:hover &__image img {
-    transform: scale(1.05);
-  }
-
-  &__content {
-    padding: 20px; // Giảm padding
-    display: flex;
-    flex-direction: column;
-    height: calc(100% - 200px);
-    min-height: 180px;
-  }
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px; // Giảm margin
-    gap: 8px;
-  }
-
-  &__name {
-    font-size: 21px;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
-    line-height: 1.3;
-    flex: 1;
-  }
-
-  &__rating {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    background: #fff3cd;
-    padding: 4px 8px;
-    border-radius: 12px;
-    flex-shrink: 0;
-
-    .rating-icon {
-      font-size: 17px;
-    }
-
-    .rating-value {
-      font-size: 17px;
-      font-weight: 600;
-      color: #856404;
-    }
-  }
-
-  &__location {
-    color: #666;
-    margin-bottom: 14px; // Giảm margin
-    font-size: 18px;
-  }
-
-  &__footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: auto;
-    gap: 10px; // Giảm gap
-  }
-
-  &__price {
-    .price-amount {
-      font-size: 20px;
+    h2 {
+      font-size: 2.5rem;
       font-weight: 700;
-      color: #333;
+      color: #111;
+      margin-bottom: 16px;
     }
 
-    .price-period {
-      font-size: 16px;
-      color: #666;
+    p {
+      font-size: 1.125rem;
+      color: #6b7280;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
     }
   }
-}
 
-.btn-view-details {
-  background: transparent;
-  border: 2px solid #007bff;
-  color: #007bff;
-  padding: 6px 14px; // Giảm padding
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 15px;
-  white-space: nowrap;
-  flex-shrink: 0;
-
-  &:hover {
-    background: #007bff;
-    color: white;
-    transform: translateY(-2px);
-  }
-}
-
-.section-footer {
-  text-align: center;
-  margin-top: 40px; // Giảm margin
-
-  .btn-secondary {
-    background: transparent;
-    color: #333;
-    border: 2px solid #333;
-    padding: 12px 28px; // Giảm padding
-    font-size: 20px;
+  .hotel-card {
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease;
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    height: 100%; // Đảm bảo tất cả card có cùng chiều cao
 
     &:hover {
-      background: #333;
-      color: white;
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .hotel-image {
+      position: relative;
+      overflow: hidden;
+      height: 240px;
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .hotel-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: #ef4444;
+        color: white;
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+    }
+
+    .hotel-info {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100% - 240px); // Trừ đi chiều cao của image
+
+      .hotel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+
+        .hotel-name {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #111;
+          flex: 1;
+        }
+
+        .rating {
+          .stars {
+            font-size: 12px;
+            margin-right: 4px;
+          }
+
+          .rating-value {
+            font-size: 14px;
+            font-weight: 600;
+          }
+        }
+      }
+
+      .hotel-location {
+        color: #6b7280;
+        margin-bottom: 16px;
+        flex: 1;
+      }
+
+      .hotel-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: auto; // Đẩy footer xuống dưới
+
+        .hotel-price {
+          .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111;
+          }
+
+          .period {
+            color: #6b7280;
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
+
+  .section-footer {
+    text-align: center;
+    margin-top: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .featured-hotels {
+    padding: 60px 0;
+
+    .section-header {
+      margin-bottom: 40px;
+
+      h2 {
+        font-size: 2rem;
+      }
     }
   }
 }

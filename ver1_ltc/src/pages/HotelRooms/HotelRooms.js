@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import "./HotelRooms.scss";
 
 const HotelRooms = () => {
@@ -18,7 +19,7 @@ const HotelRooms = () => {
       price: 100,
       rating: 5,
       reviews: "200+ reviews",
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/placeholder.svg?height=200&width=300&text=Grand+Resort+LA",
       amenities: ["Free wifi", "Free breakfast", "Guest service"],
     },
     {
@@ -28,7 +29,7 @@ const HotelRooms = () => {
       price: 150,
       rating: 5,
       reviews: "200+ reviews",
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/placeholder.svg?height=200&width=300&text=Regal+Palace",
       amenities: ["Free wifi", "Free breakfast", "Guest service"],
     },
     {
@@ -38,7 +39,7 @@ const HotelRooms = () => {
       price: 120,
       rating: 5,
       reviews: "200+ reviews",
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/placeholder.svg?height=200&width=300&text=Velvet+Nights+Beach",
       amenities: ["Free wifi", "Free breakfast", "Guest service"],
     },
     {
@@ -48,7 +49,7 @@ const HotelRooms = () => {
       price: 200,
       rating: 5,
       reviews: "200+ reviews",
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/placeholder.svg?height=200&width=300&text=Crystal+Waters",
       amenities: ["Free wifi", "Free breakfast", "Guest service"],
     },
     {
@@ -58,7 +59,7 @@ const HotelRooms = () => {
       price: 250,
       rating: 5,
       reviews: "200+ reviews",
-      image: "/placeholder.svg?height=200&width=300",
+      image: "/placeholder.svg?height=200&width=300&text=Skyline+Chicago",
       amenities: ["Free wifi", "Free breakfast", "Guest service"],
     },
   ];
@@ -128,9 +129,9 @@ const HotelRooms = () => {
                       <span className="amount">${hotel.price}</span>
                       <span className="period">/day</span>
                     </div>
-                    <a href={`/hotel/${hotel.id}`} className="btn btn-outline">
+                    <Link to={`/hotel/${hotel.id}`} className="btn btn-outline">
                       View Details
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
