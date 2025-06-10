@@ -1,77 +1,32 @@
-import React, { useState } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header/Header";
-import Hero from "./components/Hero/Hero";
-import FeaturedHotels from "./components/FeaturedHotels/FeaturedHotels";
-import ExclusiveOffers from "./components/ExclusiveOffers/ExclusiveOffers";
-import Testimonials from "./components/Testimonials/Testimonials";
-import Newsletter from "./components/Newsletter/Newsletter";
 import Footer from "./components/Footer/Footer";
-import HotelDetail from "./components/HotelDetail/HotelDetail";
+import Homepage from "./pages/HomePage/HomePage";
+import HotelDetail from "./pages/HotelDetail/HotelDetail";
+import MyBookings from "./pages/MyBookings/MyBookings";
+import HotelRooms from "./pages/HotelRooms/HotelRooms";
+import LoginPage from "./pages/Auth/LoginPage";
+import Payment from "./pages/Payment/Payment";
 import "./App.scss";
-import MyBookings from "./components/MyBookings/MyBookings";
-import HotelRooms from "./components/HotelRooms/HotelRooms";
-import LoginPage from "./components/LoginPage/LoginPage";
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("home"); // 'home' or 'hotel-detail'
-
-  const showHotelDetail = () => {
-    setCurrentPage("hotel-detail");
-  };
-
-  const showMyBooking = () => {
-    setCurrentPage("booking-detail");
-  };
-
-  const showMyRoom = () => {
-    setCurrentPage("room-detail");
-  };
-
-  const showHome = () => {
-    setCurrentPage("home");
-  };
-
-  if (currentPage === "hotel-detail") {
-    return (
-      <div className="App">
-        <Header onLogoClick={showHome} />
-        <HotelDetail />
-        <Footer />
-      </div>
-    );
-  }
-
-  if (currentPage === "booking-detail") {
-    return (
-      <div className="App">
-        <Header onLogoClick={showHome} />
-        <MyBookings />
-        <Footer />
-      </div>
-    );
-  }
-
-  if (currentPage === "room-detail") {
-    return (
-      <div className="App">
-        <Header onLogoClick={showHome} />
-        <HotelRooms />
-        <Footer />
-      </div>
-    );
-  }
-
   return (
-    <div className="App">
-      {/* <Header onViewBookings={showMyBooking} onViewRooms={showMyRoom} />
-      <Hero />
-      <FeaturedHotels onViewDetails={showHotelDetail} />
-      <ExclusiveOffers />
-      <Testimonials />
-      <Newsletter />
-      <Footer /> */}
-      <LoginPage />
-    </div>
+    <Router>
+      <div className="App">
+        <Header />
+        <main className="main-content">
+          <Routes>
+            <Route path="/" element={<Homepage />} />
+            <Route path="/hotels" element={<HotelRooms />} />
+            <Route path="/hotel/:id" element={<HotelDetail />} />
+            <Route path="/bookings" element={<MyBookings />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/payment" element={<Payment />} />
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
