@@ -5,6 +5,7 @@ const LoginPage = () => {
   const [isActive, setIsActive] = useState(false);
 
   return (
+    <div className="login-wrapper">
     <div className={`login-container ${isActive ? 'login-active' : ''}`}>
       <div className="login-form-container login-sign-up">
         <form>
@@ -19,6 +20,10 @@ const LoginPage = () => {
           <input type="text" placeholder="Name" />
           <input type="email" placeholder="Email" />
           <input type="password" placeholder="Password" />
+          <p className="mobile-toggle-link" onClick={() => setIsActive(false)}>
+  Already have an account? <span>Sign In</span>
+</p>
+
           <button>Sign Up</button>
         </form>
       </div>
@@ -36,6 +41,9 @@ const LoginPage = () => {
           <input type="email" placeholder="Email" />
           <input type="password" placeholder="Password" />
           <a href="#">Forget Your Password?</a>
+          <p className="mobile-toggle-link" onClick={() => setIsActive(true)}>
+  Don't have an account? <span>Sign Up</span>
+</p>
           <button>Sign In</button>
         </form>
       </div>
@@ -54,6 +62,7 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
