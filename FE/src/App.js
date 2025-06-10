@@ -10,6 +10,7 @@ import HotelDetail from "./components/HotelDetail/HotelDetail";
 import "./App.scss";
 import MyBookings from "./components/MyBookings/MyBookings";
 import HotelRooms from "./components/HotelRooms/HotelRooms";
+import LoginPage from "./components/LoginPage/LoginPage";
 
 function App() {
   const [currentPage, setCurrentPage] = useState("home"); // 'home' or 'hotel-detail'
@@ -62,13 +63,14 @@ function App() {
 
   return (
     <div className="App">
-      <Header onViewBookings={showMyBooking} onViewRooms={showMyRoom} />
+      {/* <Header onViewBookings={showMyBooking} onViewRooms={showMyRoom} />
       <Hero />
       <FeaturedHotels onViewDetails={showHotelDetail} />
       <ExclusiveOffers />
       <Testimonials />
       <Newsletter />
-      <Footer />
+      <Footer /> */}
+      <LoginPage />
     </div>
   );
 }
