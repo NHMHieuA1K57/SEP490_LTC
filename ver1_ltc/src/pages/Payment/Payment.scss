@@ -1,449 +1,510 @@
-.my-bookings {
+.payment-page {
   padding: 60px 0;
-  min-height: 70vh;
-
-  .bookings-header {
-    margin-bottom: 32px;
-
+  background-color: #f9fafb;
+  min-height: 100vh;
+  
+  .page-header {
+    margin-bottom: 40px;
+    
     h1 {
       font-size: 2.5rem;
       font-weight: 700;
       color: #111;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
-
+    
     p {
-      font-size: 1.125rem;
+      font-size: 1rem;
       color: #6b7280;
-      max-width: 700px;
+      max-width: 600px;
       line-height: 1.6;
     }
   }
-
-  .bookings-filters {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
-
-    .filter-tabs {
-      display: flex;
-      gap: 8px;
-
-      .filter-tab {
-        padding: 8px 16px;
-        border: none;
-        background: none;
-        font-size: 14px;
-        font-weight: 500;
-        color: #6b7280;
-        border-radius: 20px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-
-        &:hover {
-          color: #111;
-          background-color: #f3f4f6;
-        }
-
-        &.active {
-          background-color: #2563eb;
-          color: white;
-        }
-      }
-    }
-
-    .filter-search {
-      display: flex;
-      align-items: center;
-      position: relative;
-
-      input {
-        padding: 10px 16px;
-        padding-right: 40px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 14px;
-        width: 250px;
-
-        &:focus {
-          outline: none;
-          border-color: #2563eb;
-        }
-      }
-
-      .search-btn {
-        position: absolute;
-        right: 8px;
-        background: none;
-        border: none;
-        color: #6b7280;
-        cursor: pointer;
-
-        &:hover {
-          color: #111;
-        }
-      }
-    }
-  }
-
-  .bookings-table-header {
+  
+  .payment-container {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 32px;
-    padding: 16px 24px;
-    background-color: #f9fafb;
-    border-radius: 12px;
-    margin-bottom: 16px;
-
-    .column-header {
-      font-weight: 600;
-      color: #374151;
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-  }
-
-  .bookings-list {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .booking-card {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr;
-    gap: 32px;
-    padding: 24px;
-    align-items: center;
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.2s ease;
-
-    &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .hotel-info {
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
-
-      .hotel-image {
-        flex-shrink: 0;
-
-        img {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 40px;
+    
+    .payment-form-container {
+      background-color: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      
+      .payment-methods {
+        margin-bottom: 32px;
+        
+        h3 {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #111;
+          margin-bottom: 20px;
+        }
+        
+        .method-options {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          
+          .method-option {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: white;
+            
+            &:hover {
+              border-color: #2563eb;
+              background-color: rgba(37, 99, 235, 0.02);
+            }
+            
+            &--active {
+              border-color: #2563eb;
+              background-color: rgba(37, 99, 235, 0.05);
+              box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.1);
+            }
+            
+            input[type="radio"] {
+              display: none;
+            }
+            
+            .method-icon {
+              width: 48px;
+              height: 48px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              background-color: #f3f4f6;
+              border-radius: 8px;
+              color: #4b5563;
+              transition: all 0.2s ease;
+              
+              &--paypal {
+                background-color: #0070ba;
+                color: white;
+              }
+              
+              &--apple {
+                background-color: #000;
+                color: white;
+              }
+            }
+            
+            .method-info {
+              display: flex;
+              flex-direction: column;
+              flex: 1;
+              
+              .method-name {
+                font-weight: 600;
+                color: #111;
+                margin-bottom: 4px;
+                font-size: 1rem;
+              }
+              
+              .method-desc {
+                font-size: 0.875rem;
+                color: #6b7280;
+              }
+            }
+          }
+        }
+      }
+      
+      .credit-card-form {
+        .form-group {
+          margin-bottom: 24px;
+          
+          label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+          }
+          
+          input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+            
+            &:focus {
+              outline: none;
+              border-color: #2563eb;
+              box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            }
+            
+            &::placeholder {
+              color: #9ca3af;
+            }
+          }
+        }
+        
+        .form-row {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+        
+        .save-card-option {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 0.875rem;
+          color: #374151;
+          margin-bottom: 24px;
+          cursor: pointer;
+          
+          input[type="checkbox"] {
+            display: none;
+          }
+          
+          .checkmark {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 3px;
+            position: relative;
+            transition: all 0.2s ease;
+            
+            &::after {
+              content: "";
+              position: absolute;
+              display: none;
+            }
+          }
+          
+          input[type="checkbox"]:checked + .checkmark {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            
+            &::after {
+              display: block;
+              left: 4px;
+              top: 1px;
+              width: 4px;
+              height: 8px;
+              border: solid white;
+              border-width: 0 2px 2px 0;
+              transform: rotate(45deg);
+            }
+          }
+        }
+        
+        .pay-btn {
+          width: 100%;
+          padding: 14px;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+      }
+      
+      .alternative-payment {
+        padding: 40px 0;
+        
+        &__content {
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 24px;
+        }
+        
+        &__icon {
           width: 80px;
-          height: 60px;
-          object-fit: cover;
-          border-radius: 8px;
+          height: 80px;
           background-color: #f3f4f6;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #4b5563;
+          
+          svg {
+            width: 48px;
+            height: 48px;
+          }
+        }
+        
+        p {
+          margin: 0;
+          color: #4b5563;
+          font-size: 1rem;
+          max-width: 300px;
+        }
+        
+        .pay-btn {
+          min-width: 200px;
+          padding: 14px 32px;
+          font-size: 1rem;
+          font-weight: 600;
         }
       }
-
-      .hotel-details {
-        flex: 1;
-
-        .hotel-name {
+      
+      .payment-security {
+        margin-top: 40px;
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 20px;
+        background-color: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        
+        .security-icon {
+          width: 48px;
+          height: 48px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: #e5e7eb;
+          border-radius: 50%;
+          color: #4b5563;
+          flex-shrink: 0;
+        }
+        
+        .security-info {
+          h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 4px;
+          }
+          
+          p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.5;
+            margin: 0;
+          }
+        }
+      }
+    }
+    
+    .booking-summary {
+      background-color: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      height: fit-content;
+      position: sticky;
+      top: 100px;
+      
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111;
+        margin-bottom: 24px;
+      }
+      
+      .hotel-info {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e5e7eb;
+        
+        &__image {
+          flex-shrink: 0;
+          
+          img {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+          }
+        }
+        
+        &__details {
+          flex: 1;
+          
+          h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #111;
+            margin-bottom: 4px;
+          }
+          
+          p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin: 0;
+          }
+        }
+      }
+      
+      .booking-details {
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e5e7eb;
+        
+        .detail-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 12px;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          span {
+            font-size: 0.875rem;
+            
+            &:first-child {
+              color: #6b7280;
+            }
+            
+            &:last-child {
+              font-weight: 500;
+              color: #111;
+            }
+          }
+        }
+      }
+      
+      .price-details {
+        margin-bottom: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e5e7eb;
+        
+        .price-row {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 12px;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+          
+          span {
+            font-size: 0.875rem;
+            
+            &:first-child {
+              color: #6b7280;
+            }
+            
+            &:last-child {
+              font-weight: 500;
+              color: #111;
+            }
+          }
+          
+          &--total {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed #e5e7eb;
+            
+            span {
+              font-size: 1rem;
+              font-weight: 600;
+              color: #111;
+            }
+          }
+        }
+      }
+      
+      .cancellation-policy {
+        h4 {
           font-size: 1rem;
           font-weight: 600;
           color: #111;
-          margin-bottom: 4px;
-          text-decoration: none;
-          display: block;
-
-          &:hover {
-            color: #2563eb;
-          }
-
-          .hotel-type {
-            font-weight: 400;
-            color: #6b7280;
-            font-size: 0.875rem;
-          }
-        }
-
-        .hotel-location {
-          color: #6b7280;
-          font-size: 0.875rem;
           margin-bottom: 8px;
         }
-
-        .hotel-price {
-          font-weight: 600;
-          color: #111;
+        
+        p {
           font-size: 0.875rem;
-        }
-      }
-    }
-
-    .date-info {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-
-      .date-section {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-
-        label {
-          font-size: 0.75rem;
           color: #6b7280;
-          font-weight: 500;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        span {
-          font-size: 0.875rem;
-          color: #111;
-          font-weight: 500;
+          line-height: 1.5;
+          margin: 0;
         }
       }
     }
-
-    .payment-info {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      align-items: flex-start; // Thay đổi từ flex-end thành flex-start
-
-      .status-section {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start; // Thay đổi từ flex-end thành flex-start
-        gap: 4px;
-
-        .booking-id {
-          font-size: 0.75rem;
-          color: #9ca3af;
-          font-weight: 500;
-        }
-      }
-
-      .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        align-items: flex-start; // Thay đổi từ flex-end thành flex-start
-        position: relative;
-        width: 100%; // Thêm width 100% để buttons có thể expand
-
-        .pay-now-btn,
-        .details-btn {
-          font-size: 0.875rem;
-          padding: 8px 16px;
-          text-decoration: none;
-          text-align: center;
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          min-width: 120px;
-          justify-content: center;
-          width: 100%; // Thêm để buttons fill width
-
-          svg {
-            width: 14px;
-            height: 14px;
-          }
-        }
-
-        .pay-now-btn {
-          background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-          border: none;
-          color: white;
-
-          &:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            transform: translateY(-1px);
-          }
-        }
-
-        .details-btn {
-          background: transparent;
-          border: 1px solid #d1d5db;
-          color: #374151;
-
-          &:hover {
-            background-color: #f9fafb;
-            border-color: #9ca3af;
-          }
-        }
-
-        .more-actions {
-          position: relative;
-          align-self: flex-start; // Đảm bảo more button align left
-
-          .more-btn {
-            background: none;
-            border: none;
-            padding: 6px;
-            border-radius: 6px;
-            color: #6b7280;
-            cursor: pointer;
-            transition: all 0.2s ease;
-
-            &:hover {
-              background-color: #f3f4f6;
-              color: #374151;
-            }
-          }
-
-          .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            left: 0; // Thay đổi từ right: 0 thành left: 0
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            min-width: 180px;
-            z-index: 10;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-8px);
-            transition: all 0.2s ease;
-
-            .dropdown-item {
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              width: 100%;
-              padding: 10px 16px;
-              border: none;
-              background: none;
-              text-align: left;
-              font-size: 0.875rem;
-              color: #374151;
-              cursor: pointer;
-              transition: background-color 0.2s ease;
-
-              &:first-child {
-                border-radius: 8px 8px 0 0;
-              }
-
-              &:last-child {
-                border-radius: 0 0 8px 8px;
-              }
-
-              &:hover {
-                background-color: #f9fafb;
-              }
-
-              &.cancel {
-                color: #dc2626;
-
-                &:hover {
-                  background-color: #fef2f2;
-                }
-              }
-
-              svg {
-                width: 14px;
-                height: 14px;
-              }
-            }
-          }
-
-          &:hover .dropdown-menu {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-          }
-        }
-      }
-    }
-  }
-}
-
-// Cập nhật status badge
-.status-badge {
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-
-  &.paid {
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-    color: #166534;
-    border: 1px solid #86efac;
-  }
-
-  &.unpaid {
-    background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%);
-    color: #dc2626;
-    border: 1px solid #fca5a5;
-  }
-}
-
-// Thêm btn-ghost style
-.btn-ghost {
-  background: none;
-  border: none;
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: #f3f4f6;
   }
 }
 
 @media (max-width: 1024px) {
-  .my-bookings {
-    .bookings-filters {
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-
-      .filter-search {
-        width: 100%;
-
-        input {
-          width: 100%;
-        }
+  .payment-page {
+    .payment-container {
+      grid-template-columns: 1fr;
+      
+      .booking-summary {
+        order: -1;
+        position: static;
       }
     }
   }
 }
 
 @media (max-width: 768px) {
-  .my-bookings {
-    .bookings-table-header {
-      display: none;
+  .payment-page {
+    padding: 40px 0;
+    
+    .page-header {
+      h1 {
+        font-size: 2rem;
+      }
     }
-
-    .booking-card {
-      grid-template-columns: 1fr;
-      gap: 20px;
-
-      .payment-info {
-        align-items: flex-start; // Đảm bảo mobile cũng align left
-
-        .action-buttons {
-          flex-direction: row; // Thay đổi thành row trên mobile
-          flex-wrap: wrap;
-          gap: 12px;
-
-          .pay-now-btn,
-          .details-btn {
-            width: auto; // Reset width trên mobile
-            flex: 1; // Cho phép buttons chia đều space
-            min-width: 100px;
+    
+    .payment-form-container {
+      padding: 24px;
+      
+      .credit-card-form {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+      }
+      
+      .method-options {
+        .method-option {
+          padding: 12px;
+          
+          .method-icon {
+            width: 40px;
+            height: 40px;
           }
-
-          .more-actions {
-            .dropdown-menu {
-              left: auto;
-              right: 0; // Trên mobile, dropdown vẫn align right để không bị overflow
+          
+          .method-info {
+            .method-name {
+              font-size: 0.875rem;
             }
+            
+            .method-desc {
+              font-size: 0.75rem;
+            }
+          }
+        }
+      }
+    }
+    
+    .booking-summary {
+      padding: 24px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .payment-page {
+    .payment-form-container {
+      padding: 20px;
+      
+      .alternative-payment {
+        padding: 30px 0;
+        
+        &__icon {
+          width: 60px;
+          height: 60px;
+          
+          svg {
+            width: 36px;
+            height: 36px;
           }
         }
       }
