@@ -12,13 +12,13 @@ const register = async (req, res) => {
       message: result.message,
       userId: result.userId,
       otp: result.otp,
-      expiryTime: result.expiryTime
+      expiryTime: result.expiryTime,
     });
   } catch (error) {
     return res.status(error.status || 500).json({
       success: false,
       message: error.message || 'Lỗi hệ thống',
-      error: error.error || error.message
+      error: error.error || error.message,
     });
   }
 };
@@ -26,17 +26,17 @@ const register = async (req, res) => {
 const verifyOtp = async (req, res) => {
   try {
     const { email, verificationCode } = req.body;
-    const result = await authService.verifyOtp({ email, verificationCode});
+    const result = await authService.verifyOtp({ email, verificationCode });
     return res.status(200).json({
       success: true,
-      message: result.message
+      message: result.message,
     });
   } catch (error) {
     console.error('Error in verifyOtp:', error);
     return res.status(error.status || 500).json({
       success: false,
       message: error.message || 'Lỗi hệ thống',
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -74,30 +74,30 @@ const forgotPassword = async (req, res) => {
       message: result.message,
       messageId: result.messageId,
       otp: result.otp,
-      expiryTime: result.expiryTime
+      expiryTime: result.expiryTime,
     });
   } catch (error) {
     console.error('Error in forgotPassword:', error);
     return res.status(error.status || 500).json({
       success: false,
-      message: error.message || 'Lỗi hệ thống'
+      message: error.message || 'Lỗi hệ thống',
     });
   }
 };
 
 const resetPassword = async (req, res) => {
   try {
-    const { email, resetCode, newPassword, expiryTime, otp } = req.body; // Added otp to the request
+    const { email, resetCode, newPassword, expiryTime, otp } = req.body;
     const result = await authService.resetPassword(email, resetCode, newPassword, expiryTime, otp);
     return res.status(200).json({
       success: true,
-      message: result.message
+      message: result.message,
     });
   } catch (error) {
     console.error('Error in resetPassword:', error);
     return res.status(error.status || 500).json({
       success: false,
-      message: error.message || 'Lỗi hệ thống'
+      message: error.message || 'Lỗi hệ thống',
     });
   }
 };
@@ -110,13 +110,13 @@ const getProfile = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Lấy thông tin hồ sơ thành công',
-      data: profile
+      data: profile,
     });
   } catch (error) {
     console.error('Error in getProfile:', error);
     return res.status(error.status || 500).json({
       success: false,
-      message: error.message || 'Lỗi hệ thống'
+      message: error.message || 'Lỗi hệ thống',
     });
   }
 };
@@ -130,13 +130,13 @@ const updateProfile = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: 'Cập nhật thông tin cá nhân thành công',
-      data: updatedProfile
+      data: updatedProfile,
     });
   } catch (error) {
     console.error('Error in updateProfile:', error);
     return res.status(error.status || 500).json({
       success: false,
-      message: error.message || 'Lỗi hệ thống'
+      message: error.message || 'Lỗi hệ thống',
     });
   }
 };
@@ -202,5 +202,5 @@ module.exports = {
   getProfile,
   updateProfile,
   logout,
-  refreshToken
+  refreshToken,
 };

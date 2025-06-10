@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Bookings Model: Lưu thông tin đặt phòng và đặt tour
 const BookingSchema = new Schema({
   userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   type: { type: String, enum: ['hotel', 'tour'], required: true },
@@ -18,13 +17,17 @@ const BookingSchema = new Schema({
   totalPrice: { type: Number, required: true },
   status: { type: String, enum: ['pending', 'confirmed', 'cancelled', 'completed'], default: 'pending' },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  paymentInfo: {
+    bookingCode: { type: String, unique: true, required: true },
+    payoutStatus: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' }
+  }
 }, { timestamps: true });
 
-// Indexes for user, hotel, tour, and date queries
+// Indices
 BookingSchema.index({ userId: 1 });
 BookingSchema.index({ hotelId: 1 });
 BookingSchema.index({ tourId: 1 });
 BookingSchema.index({ 'details.tourDate': 1 });
+// BookingSchema.index({ 'paymentInfo.bookingCode': 1 });
 
 module.exports = mongoose.model('Booking', BookingSchema);
