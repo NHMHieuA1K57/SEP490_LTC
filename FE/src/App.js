@@ -8,6 +8,7 @@ import HotelRooms from "./pages/HotelRooms/HotelRooms";
 import LoginPage from "./pages/Auth/LoginPage";
 import Payment from "./pages/Payment/Payment";
 import "./App.scss";
+import HotelReg from "./components/Admin/HotelReg";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/bookings" element={<MyBookings />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/payment" element={<Payment />} />
+            <Route path="/register" element={<HotelReg />} />
           </Routes>
         </main>
         <Footer />
