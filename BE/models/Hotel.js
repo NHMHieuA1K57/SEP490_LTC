@@ -19,7 +19,9 @@ const HotelSchema = new Schema({
       date: { type: Date, required: true },
       quantity: { type: Number, required: true }
     }],
-    description: { type: String }
+    description: { type: String },
+    amenities: [{ type: String }],
+    images: [{ type: String }]
   }],
   rating: { type: Number, default: 0 },
   status: { type: String, enum: ['active', 'pending', 'inactive'], default: 'pending' },

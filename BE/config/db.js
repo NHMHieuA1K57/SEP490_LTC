@@ -14,7 +14,7 @@ db.Notification = require('../models/Notification');
 db.Report = require('../models/Report');
 db.LoyaltyPoints = require('../models/LoyaltyPoints');
 db.SystemSettings = require('../models/SystemSettings');
-
+db.Wallet = require('../models/Wallet');
 db.connectDB = async () => {
    await mongoose.connect(process.env.MONGO_URI, {
     dbName: process.env.DB_NAME 
