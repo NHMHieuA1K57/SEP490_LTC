@@ -1,15 +1,16 @@
 import React from 'react'
-import Navbar from '../../components/Admin/Navbar'
-import Sidebar from '../../components/Admin/Sidebar'
+import './Layout.css'
+import Navbar from '../../components/HotelOwner/Navbar'
+import Sidebar from '../../components/HotelOwner/Sidebar'
 import { Outlet } from 'react-router-dom'
 
 const Layout = () => {
   return (
-    <div className='flex flex-col h-screen'>
+    <div className='layout-container'>
         <Navbar />
-        <div className='flex h-full'>
+        <div className='layout-content'>
             <Sidebar />
-            <div className='flex-1 p-4 pt-10 md:px-10 h-full'>
+            <div className='layout-outlet'>
                 <Outlet />
             </div>
         </div>

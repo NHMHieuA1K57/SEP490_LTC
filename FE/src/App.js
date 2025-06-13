@@ -8,7 +8,7 @@ import HotelRooms from "./pages/HotelRooms/HotelRooms";
 import LoginPage from "./pages/Auth/LoginPage";
 import Payment from "./pages/Payment/Payment";
 import "./App.scss";
-import HotelReg from "./components/Admin/HotelReg";
+import HotelReg from "./components/HotelOwner/HotelReg";
 import Layout from "./pages/HotelOwner/Layout";
 import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
