@@ -1,0 +1,24 @@
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.layout-content {
+  display: flex;
+  height: 100%;
+}
+
+.layout-outlet {
+  flex: 1;
+  padding: 1rem;
+  padding-top: 2.5rem;
+  height: 100%;
+}
+
+@media (min-width: 768px) {
+  .layout-outlet {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
