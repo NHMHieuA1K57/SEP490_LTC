@@ -30,13 +30,23 @@ const Header = () => {
             >
               Hotels
             </Link>
-            <Link to="#" className="nav-link">
+            <Link
+              to="/destination"
+              className={`nav-link ${
+                location.pathname === "/destination" ? "active" : ""
+              }`}
+            >
               Destination
             </Link>
             <Link to="#" className="nav-link">
               Experiences
             </Link>
-            <Link to="#" className="nav-link">
+            <Link
+              to="/about"
+              className={`nav-link ${
+                location.pathname === "/about" ? "active" : ""
+              }`}
+            >
               About
             </Link>
           </nav>
