@@ -10,6 +10,11 @@ import Payment from "./pages/Payment/Payment";
 import About from "./pages/About/About";
 import Destination from "./pages/Destination/Destination";
 import "./App.scss";
+import HotelReg from "./components/HotelOwner/HotelReg";
+import Layout from "./pages/HotelOwner/Layout";
+import Dashboard from "./pages/HotelOwner/Dashboard";
+import AddRoom from "./pages/HotelOwner/AddRoom";
+import ListRoom from "./pages/HotelOwner/ListRoom";
 
 function App() {
   return (
@@ -24,8 +29,17 @@ function App() {
             <Route path="/bookings" element={<MyBookings />} />
             <Route path="/login" element={<Login />} />
             <Route path="/payment" element={<Payment />} />
+
             <Route path="/about" element={<About />} />
             <Route path="/destination" element={<Destination />} />
+
+            <Route path="/register" element={<HotelReg />} />
+            <Route path="/owner" element={<Layout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="add-room" element={<AddRoom />} />
+              <Route path="list-rooms" element={<ListRoom />} />
+            </Route>
+
           </Routes>
         </main>
         <Footer />
