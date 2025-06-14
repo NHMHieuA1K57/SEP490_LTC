@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import Title from '../../components/Title'
 import './ListRoom.css'
+import { roomsDummyData } from '../../assets/assets'
 
 const ListRoom = () => {
-  const [rooms, setRooms] = useState([])
+  const [rooms, setRooms] = useState(roomsDummyData)
 
   return (
     <div className="listroom-container">
