@@ -3,16 +3,17 @@ const Schema = mongoose.Schema;
 
 const TransactionSchema = new Schema({
   bookingId: { type: Schema.Types.ObjectId, ref: 'Booking', required: true },
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }, 
-  type: { type: String, enum: ['payment', 'payout'], required: true }, 
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  type: { type: String, enum: ['payment', 'payout', 'withdrawal', 'refund'], required: true },
   amount: { type: Number, required: true },
   method: { type: String, enum: ['momo', 'vnpay', 'paypal', 'bank_transfer'], required: true },
   status: { type: String, enum: ['pending', 'completed', 'failed'], default: 'pending' },
   transactionId: { type: String, required: true },
+  paymentLinkId: { type: String }, 
   createdAt: { type: Date, default: Date.now },
   details: {
-    commission: { type: Number, default: 0 }, 
-    businessUserId: { type: Schema.Types.ObjectId, ref: 'User' }, // hotel_owner/tour_provider (cho payout)
+    commission: { type: Number, default: 0 },
+    businessUserId: { type: Schema.Types.ObjectId, ref: 'User' },
     completedAt: { type: Date }
   }
 }, { timestamps: true });

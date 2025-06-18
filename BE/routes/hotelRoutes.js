@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const hotelController = require('../controllers/hotelController');
 const roomController = require('../controllers/roomController');
-const bookingController = require('../controllers/bookingController');
 const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
 const upload = require('../utils/upload');
 
@@ -25,10 +24,6 @@ router.patch('/:hotelId/room/:roomId/availability', authMiddleware, roleMiddlewa
 router.patch('/:hotelId/room/:roomId/price', authMiddleware, roleMiddleware(['hotel_owner']), roomController.updateRoomPrice);
 
 
-router.get('/booking', authMiddleware, roleMiddleware(['hotel_owner']), bookingController.getBookings);
-router.get('/booking/:bookingId', authMiddleware, roleMiddleware(['hotel_owner']), bookingController.getBookingById);
-router.patch('/booking/:bookingId/confirm', authMiddleware, roleMiddleware(['hotel_owner']), bookingController.confirmBooking);
-router.patch('/booking/:bookingId/cancel', authMiddleware, roleMiddleware(['hotel_owner']), bookingController.cancelBooking);
-router.get('/booking/history', authMiddleware, roleMiddleware(['hotel_owner']), bookingController.getBookingHistory);
+
 
 module.exports = router;
