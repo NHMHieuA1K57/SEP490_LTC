@@ -13,7 +13,7 @@ const transactionRoutes = require('./routes/businessUserRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
 const app = express();
-
+const paymentRoutes = require('./routes/paymentRoutes');
 // Middleware
 app.use(express.json());
 app.use(morgan("dev")); 
