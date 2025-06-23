@@ -9,7 +9,7 @@ const authRoutes = require('./routes/authRoutes');
 const BusinessUserRoutes = require('./routes/businessUserRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const app = express();
-
+const paymentRoutes = require('./routes/paymentRoutes');
 // Middleware
 app.use(express.json());
 app.use(morgan("dev")); 
@@ -46,6 +46,18 @@ app.get('/', (req, res) => {
         message: "oke"
     });
 });
+// Payment
+app.use('/api/payments', paymentRoutes);
+app.get('/payment-result', (req, res) => {
+    const status = req.query.status;
+    res.send(`
+        <html>
+        <body>
+            <h2>Thanh toán ${status === 'success' ? 'THÀNH CÔNG ' : 'THẤT BẠI '}</h2>
+        </body>
+        </html>
+    `);
+});
 
 // Middleware xử lý 404 Not Found
 app.use(async (req, res, next) => {
@@ -74,3 +86,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
