@@ -6,6 +6,7 @@ db.User = require('../models/User');
 db.Hotel = require('../models/Hotel');
 db.Tour = require('../models/Tour');
 db.Booking = require('../models/Booking');
+db.Room = require('../models/Room');
 db.Review = require('../models/Review');
 db.Message = require('../models/Message');
 db.Promotion = require('../models/Promotion');
