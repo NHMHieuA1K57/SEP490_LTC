@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-// Tours Model: Lưu thông tin tour du lịch
 const TourSchema = new Schema({
   name: { type: String, required: true },
   description: { type: String },
@@ -22,10 +21,24 @@ const TourSchema = new Schema({
   rating: { type: Number, default: 0 },
   status: { type: String, enum: ['active', 'pending', 'inactive'], default: 'pending' },
   createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now }
+  additionalInfo: {
+    policies: {
+      cancellation: { type: String },
+      depositRequired: { type: Boolean, default: false }
+    },
+    contact: {
+      phone: { type: String },
+      email: { type: String }
+    },
+    payoutPolicy: {
+      type: String,
+      enum: ['weekly', 'biweekly', 'monthly'],
+      default: 'monthly'
+    }
+  }
 }, { timestamps: true });
 
-// Indexes for provider and type queries
+// Indices
 TourSchema.index({ providerId: 1 });
 TourSchema.index({ type: 1 });
 

@@ -33,6 +33,9 @@ const register = async ({ email, password, name, role, phone }) => {
     status: 'pending',
     isEmailVerified: false,
     createdAt: new Date(),
+    profile: {
+      updatedAt: new Date(),
+    },
   });
   await user.save();
 
@@ -56,13 +59,13 @@ const register = async ({ email, password, name, role, phone }) => {
     return {
       userId: user._id,
       otp,
-      message: 'Đăng ký thành công! Vui lòng kiểm tra email để nhận OTP xác thực.'
+      message: 'Đăng ký thành công! Vui lòng kiểm tra email để nhận OTP xác thực.',
     };
   }
 
   return {
     userId: user._id,
-    message: 'Đăng ký thành công bằng số điện thoại.'
+    message: 'Đăng ký thành công bằng số điện thoại.',
   };
 };
 
@@ -140,7 +143,6 @@ const forgotPassword = async (email) => {
     throw { status: 404, message: 'Email không tồn tại' };
   }
 
-  // Generate and send reset code with forgot-password template
   const expiryMinutes = 10;
   const { success, otp, expiryTime, messageId } = await sendOTPEmail(email, user.name, 6, expiryMinutes, 'forgot-password');
   if (!success) {
@@ -150,25 +152,22 @@ const forgotPassword = async (email) => {
   return { message: 'Mã đặt lại mật khẩu đã được gửi qua email. Vui lòng kiểm tra hộp thư.', messageId, otp, expiryTime };
 };
 
-const resetPassword = async (email, resetCode, newPassword, expiryTime) => {
+const resetPassword = async (email, resetCode, newPassword, expiryTime, otp) => {
   const user = await findUserByEmail(email);
   if (!user) {
     throw { status: 404, message: 'Email không tồn tại' };
   }
 
-  // Validate reset code and expiry time (temporary logic)
   if (new Date() > new Date(expiryTime)) {
     throw { status: 400, message: 'Mã đặt lại đã hết hạn' };
   }
-  if (resetCode !== resetCode) { // Fixed typo: This should compare with the expected OTP, but since otp is not passed here, we use resetCode as the user input
+  if (resetCode !== otp) {
     throw { status: 400, message: 'Mã đặt lại không đúng' };
   }
 
-  // Hash new password
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-  // Update password
   await updatePassword(user._id, hashedPassword);
   return { message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.' };
 };
@@ -191,16 +190,18 @@ const getProfile = async (userId) => {
     address: user.profile.address,
     dateOfBirth: user.profile.dateOfBirth,
     avatar: user.profile.avatar,
-    loyaltyPoints: loyaltyPoints ? {
-      points: loyaltyPoints.points,
-      history: loyaltyPoints.history
-    } : null
+    loyaltyPoints: loyaltyPoints
+      ? {
+          points: loyaltyPoints.points,
+          history: loyaltyPoints.history,
+        }
+      : null,
   };
 };
 
 const updateProfile = async (userId, updates, files) => {
   const profileUpdates = {};
-    if (updates.name) profileUpdates.name = updates.name;
+  if (updates.name) profileUpdates.name = updates.name;
   if (updates.address) profileUpdates['profile.address'] = updates.address;
   if (updates.dateOfBirth) profileUpdates['profile.dateOfBirth'] = updates.dateOfBirth;
 
@@ -211,8 +212,8 @@ const updateProfile = async (userId, updates, files) => {
       const result = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
-            folder: 'SEP490/avatars', 
-            resource_type: 'image'
+            folder: 'SEP490/avatars',
+            resource_type: 'image',
           },
           (error, result) => {
             if (error) {
@@ -227,7 +228,6 @@ const updateProfile = async (userId, updates, files) => {
       });
 
       profileUpdates['profile.avatar'] = result.secure_url;
-
     } catch (error) {
       console.error('Upload error details:', error);
       throw { status: 500, message: 'Lỗi khi upload ảnh lên Cloudinary' };
@@ -244,7 +244,7 @@ const updateProfile = async (userId, updates, files) => {
     name: updatedUser.name,
     address: updatedUser.profile.address,
     dateOfBirth: updatedUser.profile.dateOfBirth,
-    avatar: updatedUser.profile.avatar
+    avatar: updatedUser.profile.avatar,
   };
 };
 
@@ -255,5 +255,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getProfile,
-  updateProfile
+  updateProfile,
 };

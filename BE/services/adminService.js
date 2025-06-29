@@ -15,27 +15,34 @@ const verifyBusinessUserService = async (data) => {
   }
 
   if (approve) {
-    user.isBusinessVerified = true;
-    user.status = 'active'; // Kích hoạt tài khoản ngay lập tức
+    user.businessInfo.isVerified = true;
+    user.status = 'active'; 
   } else {
     user.status = 'banned';
   }
 
-  user.updatedAt = new Date(); // Current date: June 06, 2025, 09:00 PM +07
+  user.updatedAt = new Date(); 
   await UserRepository.updateUser(user);
   return { success: true, message: approve ? 'Tài khoản đã được kích hoạt' : 'Tài khoản đã bị từ chối' };
 };
 
 const checkTaxCodeService = async (taxCode) => {
   try {
-    // const response = await axios.get(`https://api.vietqr.io/v2/business/taxCode?taxCode=${taxCode}`);
-     const response = await axios.get(`https://mst-thue.vercel.app/api/mst/${taxCode}`);
-    if (response.status === 200 && response.data.success) {
+    if (!taxCode || !/^\d{10}(\d{3})?$/.test(taxCode)) {
+      throw new Error('Mã số thuế không hợp lệ');
+    }
+    const url = `https://api.vietqr.io/v2/business/${taxCode}`;
+    console.log(`Gọi API: ${url}`);
+    const response = await axios.get(url);
+    console.log('Phản hồi API:', response.data);
+    if (response.status === 200 && response.data?.code === '00') {
       return { success: true, data: response.data.data };
     } else {
-      return { success: false, message: 'Mã số thuế không hợp lệ hoặc không tìm thấy' };
+      console.log('Phản hồi API không hợp lệ:', response.data);
+      return { success: false, message: `Mã số thuế không hợp lệ hoặc không tìm thấy: ${response.data?.desc || 'Không có thông tin lỗi'}` };
     }
   } catch (error) {
+    console.error('Lỗi API:', error.response?.data, error.message, error.config?.url);
     return { success: false, message: `Lỗi khi kiểm tra mã số thuế: ${error.message}` };
   }
 };

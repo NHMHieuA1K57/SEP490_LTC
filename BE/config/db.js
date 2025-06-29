@@ -9,11 +9,13 @@ db.Booking = require('../models/Booking');
 db.Review = require('../models/Review');
 db.Message = require('../models/Message');
 db.Promotion = require('../models/Promotion');
-db.Payment = require('../models/Payment');
+db.Transcation = require('../models/Transaction');
 db.Notification = require('../models/Notification');
 db.Report = require('../models/Report');
 db.LoyaltyPoints = require('../models/LoyaltyPoints');
 db.SystemSettings = require('../models/SystemSettings');
+db.Wallet = require('../models/Wallet');
+db.Payment = require('../models/Payment');
 
 db.connectDB = async () => {
    await mongoose.connect(process.env.MONGO_URI, {

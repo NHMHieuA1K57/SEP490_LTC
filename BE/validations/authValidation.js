@@ -44,6 +44,7 @@ body()
     .withMessage('Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số'),
 
   body('name')
+  .optional()
     .notEmpty()
     .withMessage('Tên không được để trống')
     .trim()
