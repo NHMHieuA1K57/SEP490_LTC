@@ -4,6 +4,7 @@ mongoose.Promise = global.Promise;
 const db = {};
 db.User = require('../models/User');
 db.Hotel = require('../models/Hotel');
+db.Room = require('../models/Room');
 db.Tour = require('../models/Tour');
 db.Booking = require('../models/Booking');
 db.Review = require('../models/Review');
