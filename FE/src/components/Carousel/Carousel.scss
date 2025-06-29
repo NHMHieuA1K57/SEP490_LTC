@@ -1,0 +1,64 @@
+.carousel {
+  position: relative;
+  width: 100%;
+
+  &__wrapper {
+    position: relative;
+    padding: 0 60px; // Giảm padding
+
+    @media (max-width: 768px) {
+      padding: 0 30px;
+    }
+  }
+
+  &__container {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  &__track {
+    display: flex;
+    transition: transform 0.4s ease-in-out;
+    will-change: transform;
+  }
+
+  &__item {
+    flex-shrink: 0;
+    box-sizing: border-box;
+  }
+
+  &__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    width: 48px; // Giảm kích thước
+    height: 48px; // Giảm kích thước
+    border-radius: 50%;
+    font-size: 24px; // Giảm font size
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    z-index: 2;
+    color: #333;
+
+    &:hover {
+      background: white;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    &--prev {
+      left: 5px; // Giảm khoảng cách
+    }
+
+    &--next {
+      right: 5px; // Giảm khoảng cách
+    }
+  }
+}

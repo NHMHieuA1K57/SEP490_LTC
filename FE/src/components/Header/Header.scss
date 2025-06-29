@@ -1,0 +1,80 @@
+.header {
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 20px;
+    color: #111;
+    text-decoration: none;
+
+    .logo-icon {
+      font-size: 24px;
+    }
+  }
+
+  .nav {
+    display: flex;
+    gap: 32px;
+
+    .nav-link {
+      text-decoration: none;
+      color: #6b7280;
+      font-weight: 500;
+      font-size: 16px;
+      transition: color 0.2s ease;
+
+      &:hover,
+      &.active {
+        color: #111;
+      }
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 8px;
+      cursor: pointer;
+      color: #6b7280;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background-color: #f3f4f6;
+        color: #111;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    .nav {
+      display: none;
+    }
+  }
+}
