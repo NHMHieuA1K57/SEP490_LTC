@@ -15,6 +15,7 @@ import Layout from "./pages/HotelOwner/Layout";
 import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
+import ResetPage from "./pages/Auth/ResetPage";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
               <Route path="add-room" element={<AddRoom />} />
               <Route path="list-rooms" element={<ListRoom />} />
             </Route>
+            <Route path="reset-password" element={<ResetPage />} />
 
           </Routes>
         </main>

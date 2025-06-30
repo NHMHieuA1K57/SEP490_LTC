@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import './Login.css';
+import OtpVerification from '../../components/OtpVerification/OtpVerification';
 
 const LoginPage = () => {
   const [isActive, setIsActive] = useState(false);
 
   return (
     <div className="login-wrapper">
+      <OtpVerification />
     <div className={`login-container ${isActive ? 'login-active' : ''}`}>
       <div className="login-form-container login-sign-up">
         <form>
