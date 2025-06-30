@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
 import './Login.css';
 import OtpVerification from '../../components/OtpVerification/OtpVerification';
+import { GoogleLogin } from '@react-oauth/google';
 
 const LoginPage = () => {
   const [isActive, setIsActive] = useState(false);
 
   return (
     <div className="login-wrapper">
-      <OtpVerification />
+      {/* <OtpVerification /> */}
     <div className={`login-container ${isActive ? 'login-active' : ''}`}>
       <div className="login-form-container login-sign-up">
         <form>
           <h1>Create Account</h1>
           <div className="login-social-icons">
-            <a href="#" className="login-icon"><i className="fa-brands fa-google-plus-g"></i></a>
+            {/* <a href="#" className="login-icon"><i className="fa-brands fa-google-plus-g"></i></a>
             <a href="#" className="login-icon"><i className="fa-brands fa-facebook-f"></i></a>
             <a href="#" className="login-icon"><i className="fa-brands fa-github"></i></a>
-            <a href="#" className="login-icon"><i className="fa-brands fa-linkedin-in"></i></a>
+            <a href="#" className="login-icon"><i className="fa-brands fa-linkedin-in"></i></a> */}
+            <GoogleLogin
+  onSuccess={credentialResponse => {
+    console.log(credentialResponse);
+  }}
+  onError={() => {
+    console.log('Login Failed');
+  }}
+/>
           </div>
           <span>or use your email for registration</span>
           <input type="text" placeholder="Name" />
@@ -34,10 +43,18 @@ const LoginPage = () => {
         <form>
           <h1>Sign In</h1>
           <div className="login-social-icons">
-            <a href="#" className="login-icon"><i className="fa-brands fa-google-plus-g"></i></a>
+            {/* <a href="#" className="login-icon"><i className="fa-brands fa-google-plus-g"></i></a>
             <a href="#" className="login-icon"><i className="fa-brands fa-facebook-f"></i></a>
             <a href="#" className="login-icon"><i className="fa-brands fa-github"></i></a>
-            <a href="#" className="login-icon"><i className="fa-brands fa-linkedin-in"></i></a>
+            <a href="#" className="login-icon"><i className="fa-brands fa-linkedin-in"></i></a> */}
+            <GoogleLogin
+  onSuccess={credentialResponse => {
+    console.log(credentialResponse);
+  }}
+  onError={() => {
+    console.log('Login Failed');
+  }}
+/>
           </div>
           <span>or use your email password</span>
           <input type="email" placeholder="Email" />
