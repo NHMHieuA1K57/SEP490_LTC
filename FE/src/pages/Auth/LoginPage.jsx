@@ -30,7 +30,7 @@ const LoginPage = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/register', {
+      const res = await axios.post('http://localhost:9999/api/auth/register', {
         ...signupData,
         role: 'customer', // hoặc tuỳ chỉnh
       });
@@ -44,7 +44,7 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', loginData, {
+      const res = await axios.post('http://localhost:9999/api/auth/login', loginData, {
         withCredentials: true, // để gửi cookie refresh token nếu có
       });
       alert('Đăng nhập thành công!');
