@@ -8,10 +8,12 @@ const LoginPage = () => {
 
   // Signup states
   const [signupData, setSignupData] = useState({
-    name: '',
-    email: '',
-    password: '',
-  });
+  name: '',
+  email: '',
+  phone: '',
+  password: '',
+});
+
 
   // Login states
   const [loginData, setLoginData] = useState({
@@ -28,18 +30,20 @@ const LoginPage = () => {
   };
 
   const handleSignup = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post('http://localhost:9999/api/auth/register', {
-        ...signupData,
-        role: 'customer', // hoặc tuỳ chỉnh
-      });
-      alert(res.data.message);
-      setIsActive(false); // chuyển sang màn login
-    } catch (err) {
-      alert(err.response?.data?.message || 'Đăng ký thất bại');
-    }
-  };
+  e.preventDefault();
+  console.log('Đang gửi signupData:', signupData);
+
+  try {
+    const res = await axios.post('http://localhost:9999/api/auth/register', signupData, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+    alert('Đăng ký thành công!');
+    console.log('User:', res.data.data.user);
+  } catch (err) {
+    console.error('Đăng ký lỗi:', err.response?.data);
+    alert(err.response?.data?.message || 'Đã có lỗi xảy ra khi đăng ký');
+  }
+};
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -87,6 +91,13 @@ const LoginPage = () => {
               value={signupData.email}
               onChange={handleSignupChange}
             />
+            <input
+      type="tel"
+      name="phone"
+      placeholder="Phone Number"
+      value={signupData.phone}
+      onChange={handleSignupChange}
+    />
             <input
               type="password"
               name="password"
