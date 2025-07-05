@@ -16,6 +16,8 @@ import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
 import ResetPage from "./pages/Auth/ResetPage";
+import RegisterBusinessUserForm from "./components/BusinessUser/RegisterBusinessUserForm";
+import UpdateBusinessProfileForm from "./components/BusinessUser/UpdateBusinessProfileForm";
 
 function App() {
   return (
@@ -41,6 +43,8 @@ function App() {
               <Route path="list-rooms" element={<ListRoom />} />
             </Route>
             <Route path="reset-password" element={<ResetPage />} />
+            <Route path="/register-business" element={<RegisterBusinessUserForm/>} />
+            <Route path="/update-profile" element={<UpdateBusinessProfileForm/>} />
 
           </Routes>
         </main>
