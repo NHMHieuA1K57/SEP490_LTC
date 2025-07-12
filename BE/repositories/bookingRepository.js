@@ -1,127 +1,214 @@
 const Booking = require('../models/Booking');
 const Hotel = require('../models/Hotel');
+const User = require('../models/User');
 
-const findBookingsByHotelIds = async (hotelIds, filters = {}) => {
-  const { status, startDate, endDate } = filters;
-  const query = { hotelId: { $in: hotelIds }, type: 'hotel' };
-  if (status) query.status = status;
-  if (startDate || endDate) {
-    query['details.checkInDate'] = {};
-    if (startDate) query['details.checkInDate'].$gte = new Date(startDate);
-    if (endDate) query['details.checkInDate'].$lte = new Date(endDate);
-  }
-  return await Booking.find(query)
-    .select('userId hotelId details totalPrice status createdAt paymentInfo')
-    .populate('userId', 'name email phone')
-    .lean();
-};
-
-const findBookingById = async (bookingId, hotelIds) => {
-  return await Booking.findOne({ _id: bookingId, hotelId: { $in: hotelIds }, type: 'hotel' })
-    .select('userId hotelId details totalPrice status createdAt paymentInfo')
-    .populate('userId', 'name email phone')
-    .lean();
-};
-
-const createBooking = async (userId, hotelId, details, paymentMethod) => {
+const getPendingBookings = async (ownerId, filters = {}, page = 1, limit = 10) => {
   try {
-    const hotel = await Hotel.findOne({ _id: hotelId, status: 'active' });
-    if (!hotel) throw new Error('Khách sạn không tồn tại hoặc không hoạt động');
+    const { hotelId } = filters;
+    const hotelQuery = { ownerId };
+    if (hotelId) {
+      hotelQuery._id = hotelId;
+    }
+    const hotels = await Hotel.find(hotelQuery).select('_id name').lean();
+    const hotelIds = hotels.map(hotel => hotel._id);
 
-    const { checkInDate, checkOutDate, roomType, numberOfPeople } = details;
-    const room = hotel.rooms.id(roomType);
-    if (!room) throw new Error('Loại phòng không tồn tại');
-
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
-    let isAvailable = true;
-    let totalPrice = 0;
-
-    const checkDate = new Date(checkIn);
-    while (checkDate <= checkOut) {
-      const dateString = checkDate.toISOString().split('T')[0];
-      const availabilityEntry = room.availability.find(
-        a => a.date.toISOString().split('T')[0] === dateString
-      );
-      if (!availabilityEntry || availabilityEntry.quantity < numberOfPeople) {
-        isAvailable = false;
-        break;
-      }
-      totalPrice += room.price; // Simple pricing; adjust for daily rate if needed
-      checkDate.setDate(checkDate.getDate() + 1);
+    if (!hotelIds.length) {
+      return { bookings: [], total: 0, page, limit };
     }
 
-    if (!isAvailable) throw new Error('Phòng không còn trống trong khoảng thời gian này');
+    const query = { type: 'hotel', status: 'pending', hotelId: { $in: hotelIds } };
+    const skip = (page - 1) * limit;
+    const [bookings, total] = await Promise.all([
+      Booking.find(query)
+        .populate('hotelId', 'name')
+        .populate('userId', 'name email')
+        .select('hotelId userId details status totalPrice paymentInfo')
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Booking.countDocuments(query)
+    ]);
 
-    const bookingCode = `BK_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-    const booking = new Booking({
-      userId,
-      type: 'hotel',
-      hotelId,
-      details: { checkInDate, checkOutDate, roomType, numberOfPeople, ...details },
-      totalPrice,
-      paymentInfo: { bookingCode, payoutStatus: 'pending', paymentMethod }
-    });
-    await booking.save();
-
-    return booking;
+    return {
+      bookings: bookings.map(booking => ({
+        _id: booking._id.toString(),
+        bookingCode: booking.paymentInfo?.bookingCode || '',
+        status: booking.status || 'pending',
+        checkInDate: booking.details.checkInDate ? booking.details.checkInDate.toISOString().split('T')[0] : null,
+        checkOutDate: booking.details.checkOutDate ? booking.details.checkOutDate.toISOString().split('T')[0] : null,
+        roomType: booking.details.roomType || '',
+        numberOfPeople: booking.details.numberOfPeople || 0,
+        totalPrice: booking.totalPrice || 0,
+        customer: {
+          name: booking.userId?.name || 'Khách ẩn danh',
+          email: booking.userId?.email || ''
+        },
+        hotel: {
+          name: booking.hotelId?.name || ''
+        }
+      })),
+      total,
+      page,
+      limit
+    };
   } catch (error) {
-    throw new Error(`Lỗi khi tạo đặt phòng: ${error.message}`);
+    throw new Error(`Lỗi khi lấy danh sách đặt phòng cần xác nhận: ${error.message}`);
   }
 };
 
-const confirmBooking = async (bookingId, hotelIds) => {
+const getBookingsByOwnerHotels = async (ownerId, filters = {}, page = 1, limit = 10) => {
   try {
-    const booking = await Booking.findOneAndUpdate(
-      { _id: bookingId, hotelId: { $in: hotelIds }, type: 'hotel', status: 'pending' },
-      { status: 'confirmed', updatedAt: new Date() },
-      { new: true, runValidators: true }
-    ).select('userId hotelId details totalPrice status createdAt paymentInfo');
-    if (!booking) throw new Error('Đặt phòng không tồn tại hoặc không thể xác nhận');
+    const { status, hotelId, fromDate, toDate } = filters;
+    const hotelQuery = { ownerId };
+    if (hotelId) {
+      hotelQuery._id = hotelId;
+    }
+    const hotels = await Hotel.find(hotelQuery).select('_id name').lean();
+    const hotelIds = hotels.map(hotel => hotel._id);
 
-    return booking;
+    if (!hotelIds.length) {
+      return { bookings: [], total: 0, page, limit };
+    }
+
+    const query = { type: 'hotel', hotelId: { $in: hotelIds } };
+    if (status) {
+      query.status = status;
+    }
+    if (fromDate) {
+      query['details.checkInDate'] = { $gte: new Date(fromDate) };
+    }
+    if (toDate) {
+      query['details.checkOutDate'] = { $lte: new Date(toDate) };
+    }
+
+    const skip = (page - 1) * limit;
+    const [bookings, total] = await Promise.all([
+      Booking.find(query)
+        .populate('hotelId', 'name')
+        .populate('userId', 'name email')
+        .select('hotelId userId details status totalPrice paymentInfo')
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Booking.countDocuments(query)
+    ]);
+
+    return {
+      bookings: bookings.map(booking => ({
+        _id: booking._id.toString(),
+        bookingCode: booking.paymentInfo?.bookingCode || '',
+        status: booking.status || 'pending',
+        checkInDate: booking.details.checkInDate ? booking.details.checkInDate.toISOString().split('T')[0] : null,
+        checkOutDate: booking.details.checkOutDate ? booking.details.checkOutDate.toISOString().split('T')[0] : null,
+        roomType: booking.details.roomType || '',
+        numberOfPeople: booking.details.numberOfPeople || 0,
+        totalPrice: booking.totalPrice || 0,
+        customer: {
+          name: booking.userId?.name || 'Khách ẩn danh',
+          email: booking.userId?.email || ''
+        },
+        hotel: {
+          name: booking.hotelId?.name || ''
+        }
+      })),
+      total,
+      page,
+      limit
+    };
   } catch (error) {
-    throw new Error(`Lỗi khi xác nhận đặt phòng: ${error.message}`);
+    throw new Error(`Lỗi khi lấy danh sách đặt phòng: ${error.message}`);
   }
 };
 
-const cancelBooking = async (bookingId, hotelIds, reason) => {
+const getBookingDetails = async (bookingId, ownerId) => {
   try {
-    const booking = await Booking.findOneAndUpdate(
-      { _id: bookingId, hotelId: { $in: hotelIds }, type: 'hotel', status: { $in: ['pending', 'confirmed'] } },
-      { status: 'cancelled', 'details.cancellationReason': reason, updatedAt: new Date() },
-      { new: true, runValidators: true }
-    ).select('userId hotelId details totalPrice status createdAt paymentInfo');
-    if (!booking) throw new Error('Đặt phòng không tồn tại, không có quyền, hoặc không thể hủy');
-    return booking;
+    const booking = await Booking.findById(bookingId)
+      .populate('hotelId', 'name address ownerId')
+      .populate('userId', 'name email phone')
+      .select('hotelId userId details status totalPrice paymentInfo commissionAmount netPayoutAmount')
+      .lean();
+
+    if (!booking) {
+      throw new Error('Đơn đặt phòng không tồn tại');
+    }
+    if (booking.type !== 'hotel' || !booking.hotelId || booking.hotelId.ownerId.toString() !== ownerId.toString()) {
+      throw new Error('Bạn không có quyền xem đơn đặt phòng này');
+    }
+
+    return {
+      _id: booking._id.toString(),
+      bookingCode: booking.paymentInfo?.bookingCode || '',
+      status: booking.status || 'pending',
+      details: {
+        checkInDate: booking.details.checkInDate ? booking.details.checkInDate.toISOString().split('T')[0] : null,
+        checkOutDate: booking.details.checkOutDate ? booking.details.checkOutDate.toISOString().split('T')[0] : null,
+        roomType: booking.details.roomType || '',
+        specialRequests: booking.details.specialRequests || ''
+      },
+      customer: {
+        name: booking.userId?.name || 'Khách ẩn danh',
+        email: booking.userId?.email || '',
+        phone: booking.userId?.phone || ''
+      },
+      hotel: {
+        name: booking.hotelId?.name || '',
+        address: booking.hotelId?.address || ''
+      },
+      paymentInfo: {
+        paymentMethod: booking.paymentInfo?.paymentMethod || 'payos',
+        payoutStatus: booking.paymentInfo?.payoutStatus || 'pending'
+      },
+      totalPrice: booking.totalPrice || 0,
+      commissionAmount: booking.commissionAmount || 0,
+      netPayoutAmount: booking.netPayoutAmount || 0
+    };
   } catch (error) {
-    throw new Error(`Lỗi khi hủy đặt phòng: ${error.message}`);
+    throw new Error(`Lỗi khi lấy chi tiết đặt phòng: ${error.message}`);
   }
 };
 
-const findBookingHistory = async (hotelIds, filters = {}) => {
-  const { startDate, endDate } = filters;
-  const query = {
-    hotelId: { $in: hotelIds },
-    type: 'hotel',
-    status: { $in: ['completed', 'cancelled'] }
-  };
-  if (startDate || endDate) {
-    query['details.checkInDate'] = {};
-    if (startDate) query['details.checkInDate'].$gte = new Date(startDate);
-    if (endDate) query['details.checkInDate'].$lte = new Date(endDate);
+const updateBookingStatus = async (bookingId, ownerId, status) => {
+  try {
+    const booking = await Booking.findById(bookingId)
+      .populate('hotelId', 'ownerId')
+      .lean();
+    if (!booking) {
+      throw new Error('Đơn đặt phòng không tồn tại');
+    }
+    if (booking.type !== 'hotel' || !booking.hotelId || booking.hotelId.ownerId.toString() !== ownerId.toString()) {
+      throw new Error('Bạn không có quyền cập nhật đơn đặt phòng này');
+    }
+
+    const validTransitions = {
+      pending: ['confirmed', 'cancelled'],
+      confirmed: ['completed', 'cancelled'],
+      completed: [],
+      cancelled: [],
+      refunded: []
+    };
+    if (!validTransitions[booking.status].includes(status)) {
+      throw new Error(`Không thể chuyển từ trạng thái ${booking.status} sang ${status}`);
+    }
+
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { $set: { status, updatedAt: new Date() } },
+      { new: true }
+    ).lean();
+
+    return {
+      _id: updatedBooking._id.toString(),
+      status: updatedBooking.status,
+      updatedAt: updatedBooking.updatedAt.toISOString()
+    };
+  } catch (error) {
+    throw new Error(`Lỗi khi cập nhật trạng thái đặt phòng: ${error.message}`);
   }
-  return await Booking.find(query)
-    .select('userId hotelId details totalPrice status createdAt paymentInfo')
-    .populate('userId', 'name email phone')
-    .lean();
 };
 
 module.exports = {
-  findBookingsByHotelIds,
-  findBookingById,
-  createBooking,
-  confirmBooking,
-  cancelBooking,
-  findBookingHistory
+  getPendingBookings,
+  getBookingsByOwnerHotels,
+  getBookingDetails,
+  updateBookingStatus
 };
