@@ -1,7 +1,10 @@
-module.exports = {
-  vnpTmnCode: 'HKY9TJN7',
-  vnpHashSecret: process.env.VNPAY_HASH_SECRET || '882QTU8SCA8JK4VOX48W6HT069EGS9C4',
-  vnpUrl: 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html',
-  vnpReturnUrl: 'http://localhost:9999/api/bookings/vnpay-callback', 
-  vnpApiUrl: 'https://sandbox.vnpayment.vn/merchant_webapi/api/transaction'
-};
+const { Payment } = require('@payos/node');
+require('dotenv').config();
+
+const payos = new Payment({
+  clientId: process.env.PAYOS_CLIENT_ID,
+  apiKey: process.env.API_KEY,
+  checksumKey: process.env.CHECKSUM_KEY
+});
+
+module.exports = payos;

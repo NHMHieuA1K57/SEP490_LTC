@@ -1,115 +1,84 @@
 const roomService = require('../services/roomService');
 
-// Generic error handler
-const handleError = (res, error) => {
-  console.error(`${error.message}`);
-  return res.status(400).json({ success: false, message: error.message });
-};
-
-// Create a new room
 const createRoom = async (req, res) => {
   try {
-    const response = await roomService.createRoomService(
-      req.params.hotelId,
-      req.user._id,
-      req.body,
-      req.files
-    );
-    return res.status(201).json({ success: true, data: response });
+    const response = await roomService.createRoomService(req.params.hotelId, req.user._id, req.body, req.files);
+    return res.status(201).json(response);
   } catch (error) {
-    return handleError(res, error);
+    console.error('Lỗi khi tạo phòng:', error.message);
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
-// Get all rooms for a hotel
-const getRooms = async (req, res) => {
-  try {
-    const response = await roomService.getRoomsService(req.params.hotelId, req.user._id);
-    return res.status(200).json({ success: true, data: response });
-  } catch (error) {
-    return handleError(res, error);
-  }
-};
-
-// Update a room
 const updateRoom = async (req, res) => {
   try {
-    const response = await roomService.updateRoomService(
-      req.params.hotelId,
-      req.params.roomId,
-      req.user._id,
-      req.body,
-      req.files
-    );
-    return res.status(200).json({ success: true, data: response });
+    const response = await roomService.updateRoomService(req.params.hotelId, req.params.roomId, req.user._id, req.body, req.files);
+    return res.status(200).json(response);
   } catch (error) {
-    return handleError(res, error);
+    console.error('Lỗi khi cập nhật phòng:', error.message);
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
-// Delete a room
-const deleteRoom = async (req, res) => {
+const getRooms = async (req, res) => {
   try {
-    const response = await roomService.deleteRoomService(
-      req.params.hotelId,
-      req.params.roomId,
-      req.user._id
-    );
-    return res.status(200).json({ success: true, data: response });
+    const response = await roomService.getRoomsByHotelIdService(req.params.hotelId);
+    return res.status(200).json(response);
   } catch (error) {
-    return handleError(res, error);
+    console.error('Lỗi khi lấy danh sách phòng:', error.message);
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
-  
-  // Update room availability
-  const updateRoomAvailability = async (req, res) => {
-    try {
-      const { availability } = req.body;
-      const response = await roomService.updateRoomAvailabilityService(
-        req.params.hotelId,
-        req.params.roomId,
-        req.user._id,
-        availability
-      );
-      return res.status(200).json({ success: true, data: response });
-    } catch (error) {
-      return handleError(res, error);
-    }
-  };
-  
-  // Update room price
-  const updateRoomPrice = async (req, res) => {
-    try {
-      const { price } = req.body;
-      const response = await roomService.updateRoomPriceService(
-        req.params.hotelId,
-        req.params.roomId,
-        req.user._id,
-        price
-      );
-      return res.status(200).json({ success: true, data: response });
-    } catch (error) {
-      return handleError(res, error);
-    }
-  };
-  
-  // Get room details
-  const getRoomDetails = async (req, res) => {
-    try {
-      const { hotelId, roomId } = req.params;
-      const response = await roomService.getRoomDetails(hotelId, roomId);
-      return res.status(200).json({ success: true, data: response });
-    } catch (error) {
-      return handleError(res, error);
-    }
-  };
-  
-  module.exports = {
-    createRoom,
-    getRooms,
-    updateRoom,
-    deleteRoom,
-    updateRoomAvailability,
-    updateRoomPrice,
-    getRoomDetails
-  };
+
+const getRoomDetails = async (req, res) => {
+  try {
+    const response = await roomService.getRoomDetailsService(req.params.hotelId, req.params.roomId);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error('Lỗi khi lấy chi tiết phòng:', error.message);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const deleteRoom = async (req, res) => {
+  try {
+    const { hotelId } = req.query;
+    const response = await roomService.deleteRoomService(hotelId, req.params.id, req.user._id);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error('Delete room error:', error.message);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const updateRoomAvailability = async (req, res) => {
+  try {
+    const { availability } = req.body;
+    const response = await roomService.updateRoomAvailabilityService(req.params.hotelId, req.params.roomId, req.user._id, availability);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error('Lỗi khi cập nhật tình trạng phòng:', error.message);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const updateRoomPrice = async (req, res) => {
+  try {
+    const { price } = req.body;
+    const response = await roomService.updateRoomPriceService(req.params.hotelId, req.params.roomId, req.user._id, price);
+    return res.status(200).json(response);
+  } catch (error) {
+    console.error('Lỗi khi cập nhật giá phòng:', error.message);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = {
+  createRoom,
+  updateRoom,
+  getRooms,
+  getRoomDetails,
+  deleteRoom,
+  updateRoomAvailability,
+  updateRoomPrice
+};

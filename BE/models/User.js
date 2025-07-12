@@ -11,7 +11,7 @@ const UserSchema = new Schema({
     default: 'customer',
     required: true
   },
-  name: { type: String }, // Bỏ required: true
+  name: { type: String }, 
   profile: {
     avatar: { type: String },
     address: { type: String },

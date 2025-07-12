@@ -14,6 +14,7 @@ const HotelSchema = new Schema({
   amenities: [{ type: String }],
   rooms: [{ type: Schema.Types.ObjectId, ref: 'Room' }],
   rating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 }, 
   status: { type: String, enum: ['active', 'pending', 'inactive'], default: 'pending' },
   additionalInfo: {
     policies: {
