@@ -1,0 +1,105 @@
+.booking-card {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 32px;
+  padding: 24px;
+  align-items: center;
+
+  .hotel-info {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+
+    .hotel-image {
+      flex-shrink: 0;
+
+      img {
+        width: 80px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 8px;
+        background-color: #f3f4f6;
+      }
+    }
+
+    .hotel-details {
+      flex: 1;
+
+      .hotel-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #111;
+        margin-bottom: 4px;
+
+        .hotel-type {
+          font-weight: 400;
+          color: #6b7280;
+          font-size: 0.875rem;
+        }
+      }
+
+      .hotel-location {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-bottom: 8px;
+      }
+
+      .hotel-price {
+        font-weight: 600;
+        color: #111;
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  .date-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .date-section {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+
+      label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      span {
+        font-size: 0.875rem;
+        color: #111;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .payment-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-end;
+
+    .pay-now-btn {
+      font-size: 0.875rem;
+      padding: 8px 16px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-card {
+    grid-template-columns: 1fr;
+    gap: 20px;
+
+    .payment-info {
+      align-items: flex-start;
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+}
