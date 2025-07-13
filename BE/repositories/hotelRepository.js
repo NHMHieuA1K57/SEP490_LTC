@@ -255,15 +255,7 @@ const searchHotelsHandler = async (filters, page = 1, limit = 10) => {
     throw new Error(`Lỗi khi tìm kiếm khách sạn: ${error.message}`);
   }
 };
-const getAllHotels = async () => {
-  return await Hotel.find()
-    .populate({
-      path: 'rooms',
-      select: 'pricePerNight'
-    })
-    .select('name images address rating reviewCount')
-    .lean();
-};
+
 module.exports = {
   createHotel,
   findHotelsByOwnerId,
@@ -271,6 +263,5 @@ module.exports = {
   getHotelDetails,
   updateHotel,
   deleteHotel,
-  searchHotelsHandler,
-  getAllHotels
+  searchHotelsHandler
 };
