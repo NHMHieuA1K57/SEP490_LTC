@@ -59,7 +59,7 @@ const register = async ({ email, password, name, role, phone }) => {
 
     return {
       userId: user._id,
-      otp,
+      // otp,
       message: 'Đăng ký thành công! Vui lòng kiểm tra email để nhận OTP xác thực.',
     };
   }

@@ -165,40 +165,86 @@ if (!Array.isArray(hotelIds) || hotelIds.length === 0) {
     return { _id: updatedBooking._id.toString(), status: updatedBooking.status, updatedAt: updatedBooking.updatedAt.toISOString() };
   },
 
-  applyPromotion: async (promotionCode, hotelId, session) => {
-    const promotion = await Promotion.findOne({
-      code: promotionCode,
-      type: 'hotel',
-      hotelId,
-      startDate: { $lte: new Date() },
-      endDate: { $gte: new Date() },
-      usedCount: { $lt: mongoose.Types.Long.fromString('maxUses') }
-    }).session(session);
+  // applyPromotion: async (promotionCode, hotelId, session) => {
+  //   const promotion = await Promotion.findOne({
+  //     code: promotionCode,
+  //     type: 'hotel',
+  //     hotelId,
+  //     startDate: { $lte: new Date() },
+  //     endDate: { $gte: new Date() },
+  //     usedCount: { $lt: mongoose.Types.Long.fromString('maxUses') }
+  //   }).session(session);
 
-    if (!promotion) throw new Error('Mã giảm giá không hợp lệ hoặc đã hết hạn');
+  //   if (!promotion) throw new Error('Mã giảm giá không hợp lệ hoặc đã hết hạn');
 
-    await Promotion.findByIdAndUpdate(
-      promotion._id,
-      { $inc: { usedCount: 1 } },
-      { session }
-    );
+  //   await Promotion.findByIdAndUpdate(
+  //     promotion._id,
+  //     { $inc: { usedCount: 1 } },
+  //     { session }
+  //   );
 
-    return promotion.discount;
-  },
+  //   return promotion.discount;
+  // },
+applyPromotion: async (promotionCode, hotelId, session) => {
+  const promotion = await Promotion.findOne({
+    code: promotionCode,
+    type: 'hotel',
+    hotelId,
+    startDate: { $lte: new Date() },
+    endDate: { $gte: new Date() },
+    $expr: { $lt: ['$usedCount', '$maxUses'] }
+  }).session(session);
+
+  if (!promotion) throw new Error('Mã giảm giá không hợp lệ hoặc đã hết hạn');
+
+  await Promotion.findByIdAndUpdate(
+    promotion._id,
+    { $inc: { usedCount: 1 } },
+    { session }
+  );
+
+  return promotion.discountAmount || (promotion.discountPercentage || 0);
+},
 
   createPayment: async (paymentData, session) => 
     await Payment.create([paymentData], { session }),
 
-  updateRoomAvailability: async (roomId, checkInDate, checkOutDate, numberOfPeople, session) => {
-    return await Room.updateOne(
+updateRoomAvailability: async (roomId, checkInDate, checkOutDate, numberOfPeople, session) => {
+  const start = new Date(checkInDate);
+  const end = new Date(checkOutDate);
+  let current = new Date(start);
+
+  while (current < end) {
+    await Room.updateOne(
       {
         _id: roomId,
-        'availability.date': { $gte: new Date(checkInDate), $lte: new Date(checkOutDate) }
+        'availability.date': current
       },
       { $inc: { 'availability.$.quantity': -numberOfPeople } },
       { session }
     );
+    current.setDate(current.getDate() + 1);
   }
+},
+
+  releaseRoomAvailability: async (roomId, checkInDate, checkOutDate, numberOfPeople, session) => {
+  const start = new Date(checkInDate);
+  const end = new Date(checkOutDate);
+  let current = new Date(start);
+
+  while (current < end) {
+    await Room.updateOne(
+      {
+        _id: roomId,
+        'availability.date': current
+      },
+      { $inc: { 'availability.$.quantity': numberOfPeople } },
+      { session }
+    );
+    current.setDate(current.getDate() + 1);
+  }
+},
+
 };
 
 module.exports = BookingRepository;
