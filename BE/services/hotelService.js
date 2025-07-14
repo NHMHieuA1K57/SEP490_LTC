@@ -2,7 +2,7 @@ const hotelRepository = require('../repositories/hotelRepository');
 const cloudinary = require('../config/cloudinary');
 
 const createHotelService = async (ownerId, data, files) => {
-  const { name, address, description, location, amenities, policies, category, contact } = data;
+  const { name, address, description, location, amenities, policies, category, payoutPolicy, contact } = data;
 
   let images = [];
   if (files && files.length > 0) {
@@ -44,6 +44,7 @@ const createHotelService = async (ownerId, data, files) => {
     additionalInfo: {
       policies: policies ? (typeof policies === 'string' ? JSON.parse(policies) : policies) : {},
       category: category || 'hotel',
+      payoutPolicy: payoutPolicy || 'monthly',
       contact: contact ? (typeof contact === 'string' ? JSON.parse(contact) : contact) : {}
     }
   };
@@ -160,26 +161,6 @@ const searchHotelsService = async (filters, page, limit) => {
   }
 };
 
-const calculateMinPrice = (rooms) => {
-  if (!rooms || rooms.length === 0) return null;
-  const prices = rooms
-    .filter(room => room.pricePerNight)
-    .map(room => room.pricePerNight);
-  return prices.length > 0 ? Math.min(...prices) : null;
-};
-
-const getAllHotels = async () => {
-  const hotels = await hotelRepository.getAllHotels();
-  
-  return hotels.map(hotel => ({
-    image: hotel.images && hotel.images.length > 0 ? hotel.images[0] : null,
-    name: hotel.name,
-    rating: hotel.rating || 0,
-    address: hotel.address,
-    reviewNumber: hotel.reviewCount || 0,
-    price: calculateMinPrice(hotel.rooms)
-  }));
-};
 module.exports = {
   createHotelService,
   getHotelsService,
@@ -187,6 +168,5 @@ module.exports = {
   getHotelDetailsService,
   updateHotelService,
   deleteHotelService,
-  searchHotelsService,
-  getAllHotels
+  searchHotelsService
 };
