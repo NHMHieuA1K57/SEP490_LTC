@@ -26,6 +26,8 @@ const Hero = () => {
     children: 0,
   });
   const guestRef = useRef();
+  const [dateRange, setDateRange] = useState([null, null]);
+  const [startDate, endDate] = dateRange;
 
   const handleSearch = (e) => {
     e.preventDefault();
