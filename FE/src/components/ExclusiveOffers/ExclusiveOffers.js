@@ -5,46 +5,44 @@ const ExclusiveOffers = () => {
   const offers = [
     {
       id: 1,
-      title: "Premium Downtown Package",
-      description: "Enjoy a complimentary night and daily breakfast",
-      discount: "20% OFF",
-      image: "/placeholder.svg?height=200&width=300&text=Downtown+Package",
-      cta: "View Offers",
+      title: "Gói nghỉ dưỡng trung tâm cao cấp",
+      description: "Tặng 1 đêm miễn phí và bữa sáng mỗi ngày",
+      discount: "Giảm 20%",
+      image: "/placeholder.svg?height=200&width=300&text=Gói+trung+tâm+cao+cấp",
+      cta: "Xem ưu đãi",
     },
     {
       id: 2,
-      title: "Weekend Island Package",
-      description:
-        "Special couple package with up to spa treatment at no additional cost",
-      discount: "25% OFF",
-      image: "/placeholder.svg?height=200&width=300&text=Island+Package",
-      cta: "View Offers",
+      title: "Gói cuối tuần trên đảo",
+      description: "Ưu đãi cặp đôi, tặng liệu trình spa miễn phí",
+      discount: "Giảm 25%",
+      image: "/placeholder.svg?height=200&width=300&text=Cuối+tuần+trên+đảo",
+      cta: "Xem ưu đãi",
     },
     {
       id: 3,
-      title: "Family Fun Staycation",
+      title: "Kỳ nghỉ gia đình vui vẻ",
       description:
-        "Book 60 days in advance and save up to 35% of any of our luxury providential suite",
-      discount: "35% OFF",
-      image: "/placeholder.svg?height=200&width=300&text=Family+Staycation",
-      cta: "View Offers",
+        "Đặt trước 60 ngày, tiết kiệm đến 35% cho phòng suite sang trọng",
+      discount: "Giảm 35%",
+      image: "/placeholder.svg?height=200&width=300&text=Gia+đình+vui+vẻ",
+      cta: "Xem ưu đãi",
     },
     {
       id: 4,
-      title: "Business Travel Deal",
-      description:
-        "Perfect for business travelers with meeting rooms and high-speed internet",
-      discount: "15% OFF",
-      image: "/placeholder.svg?height=200&width=300&text=Business+Deal",
-      cta: "View Offers",
+      title: "Ưu đãi doanh nhân",
+      description: "Phòng họp miễn phí, internet tốc độ cao cho khách công tác",
+      discount: "Giảm 15%",
+      image: "/placeholder.svg?height=200&width=300&text=Ưu+đãi+doanh+nhân",
+      cta: "Xem ưu đãi",
     },
     {
       id: 5,
-      title: "Romantic Getaway",
-      description: "Candlelit dinner, couples massage, and champagne included",
-      discount: "30% OFF",
-      image: "/placeholder.svg?height=200&width=300&text=Romantic+Getaway",
-      cta: "View Offers",
+      title: "Kỳ nghỉ lãng mạn",
+      description: "Bữa tối nến, massage đôi, tặng rượu vang cho cặp đôi",
+      discount: "Giảm 30%",
+      image: "/placeholder.svg?height=200&width=300&text=Lãng+mạn",
+      cta: "Xem ưu đãi",
     },
   ];
 
@@ -52,13 +50,13 @@ const ExclusiveOffers = () => {
     <section className="exclusive-offers">
       <div className="container">
         <div className="section-header">
-          <h2>Exclusive Offers</h2>
+          <h2>Ưu đãi đặc biệt</h2>
           <p>
-            Take advantage of our limited-time offers and special packages to
-            enhance your stay and create unforgettable memories.
+            Đừng bỏ lỡ các ưu đãi giới hạn và gói khuyến mãi hấp dẫn để kỳ nghỉ
+            của bạn thêm trọn vẹn.
           </p>
           <a href="#" className="view-all-link">
-            View All Offers →
+            Xem tất cả ưu đãi →
           </a>
         </div>
 

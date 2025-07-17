@@ -6,7 +6,7 @@ const Newsletter = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Newsletter signup:", email);
+    console.log("Đăng ký nhận tin:", email);
     setEmail("");
   };
 
@@ -14,29 +14,29 @@ const Newsletter = () => {
     <section className="newsletter">
       <div className="container">
         <div className="newsletter__content">
-          <h2 className="newsletter__title">Stay Inspired</h2>
+          <h2 className="newsletter__title">Đăng ký nhận bản tin</h2>
           <p className="newsletter__subtitle">
-            Join our newsletter and be the first to discover new destinations,
-            exclusive offers, and travel inspirations.
+            Nhận thông tin ưu đãi mới nhất, điểm đến hấp dẫn và cảm hứng du lịch
+            mỗi tuần từ chúng tôi.
           </p>
 
           <form className="newsletter__form" onSubmit={handleSubmit}>
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder="Nhập email của bạn"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="newsletter__input"
               required
             />
             <button type="submit" className="newsletter__button">
-              Subscribe →
+              Đăng ký nhận tin &rarr;
             </button>
           </form>
 
           <p className="newsletter__privacy">
-            By subscribing, you agree to our Privacy Policy and consent to
-            receive updates from our company.
+            Khi đăng ký, bạn đồng ý với Chính sách bảo mật và nhận thông báo từ
+            chúng tôi.
           </p>
         </div>
       </div>

@@ -16,6 +16,8 @@ import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
 
+import Hero from "./components/Hero/Hero";
+
 function App() {
   return (
     <Router>
@@ -39,7 +41,6 @@ function App() {
               <Route path="add-room" element={<AddRoom />} />
               <Route path="list-rooms" element={<ListRoom />} />
             </Route>
-
           </Routes>
         </main>
         <Footer />

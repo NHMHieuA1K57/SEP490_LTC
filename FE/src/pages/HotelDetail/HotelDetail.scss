@@ -230,6 +230,12 @@
   }
 }
 
+.price {
+  .amount {
+    color: #e53935 !important;
+  }
+}
+
 @media (max-width: 768px) {
   .hotel-detail {
     .hotel-content {

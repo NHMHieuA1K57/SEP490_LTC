@@ -1,20 +1,24 @@
-import HeroSection from "../../components/Hero/Hero";
+import React from "react";
+import Hero from "../../components/Hero/Hero";
+import FavoriteDestinations from "../../components/FavoriteDestinations/FavoriteDestinations";
+
 import FeaturedHotels from "../../components/FeaturedHotels/FeaturedHotels";
 import ExclusiveOffers from "../../components/ExclusiveOffers/ExclusiveOffers";
 import Testimonials from "../../components/Testimonials/Testimonials";
 import Newsletter from "../../components/Newsletter/Newsletter";
 import "./HomePage.scss";
 
-const Homepage = () => {
+function HomePage() {
   return (
-    <div className="homepage">
-      <HeroSection />
+    <>
+      <Hero />
+      <FavoriteDestinations />
       <FeaturedHotels />
       <ExclusiveOffers />
       <Testimonials />
       <Newsletter />
-    </div>
+    </>
   );
-};
+}
 
-export default Homepage;
+export default HomePage;

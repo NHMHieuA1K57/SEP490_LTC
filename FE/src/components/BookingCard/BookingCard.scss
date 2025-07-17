@@ -91,6 +91,10 @@
   }
 }
 
+.hotel-price {
+  color: #e53935 !important;
+}
+
 @media (max-width: 768px) {
   .booking-card {
     grid-template-columns: 1fr;

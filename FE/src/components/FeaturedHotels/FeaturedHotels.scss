@@ -30,7 +30,7 @@
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    height: 100%; // Đảm bảo tất cả card có cùng chiều cao
+    height: 100%;
 
     &:hover {
       transform: translateY(-4px);
@@ -65,51 +65,59 @@
       padding: 24px;
       display: flex;
       flex-direction: column;
-      height: calc(100% - 240px); // Trừ đi chiều cao của image
+      height: calc(100% - 240px);
 
-      .hotel-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 8px;
-
-        .hotel-name {
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: #111;
-          flex: 1;
-        }
-
-        .rating {
-          .stars {
-            font-size: 12px;
-            margin-right: 4px;
-          }
-
-          .rating-value {
-            font-size: 14px;
-            font-weight: 600;
-          }
-        }
+      .hotel-name {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #111;
+        margin-bottom: 4px;
+        text-align: left;
       }
 
       .hotel-location {
         color: #6b7280;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        text-align: left;
+      }
+
+      .hotel-rating {
+        display: flex;
+        align-items: center;
+        gap: 6px;
         margin-bottom: 16px;
-        flex: 1;
+        justify-content: flex-start;
+        .stars {
+          color: #ffc107;
+          font-size: 1.1rem;
+          letter-spacing: 1px;
+        }
+        .rating-value {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #111;
+        }
       }
 
       .hotel-footer {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-start;
         align-items: center;
-        margin-top: auto; // Đẩy footer xuống dưới
+        margin-top: auto;
+        gap: 12px;
 
         .hotel-price {
           .price {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #111;
+            color: #e53935 !important;
+          }
+
+          .hotel-note {
+            display: block;
+            font-size: 0.85rem;
+            color: #bfc3ca;
+            margin-top: 2px;
+            font-weight: 500;
           }
 
           .period {

@@ -12,20 +12,20 @@ const Footer = () => {
               <span className="logo-text">QuickStay</span>
             </div>
             <p className="footer__description">
-              Discover the world's finest accommodations designed to create
-              unforgettable experiences that last a lifetime.
+              Khám phá những khách sạn và chỗ nghỉ tuyệt vời nhất, mang đến trải
+              nghiệm đáng nhớ cho mọi chuyến đi của bạn.
             </p>
             <div className="footer__social">
-              <a href="#" className="social-link">
+              <a href="#" className="social-link" aria-label="Facebook">
                 📘
               </a>
-              <a href="#" className="social-link">
+              <a href="#" className="social-link" aria-label="Instagram">
                 📷
               </a>
-              <a href="#" className="social-link">
+              <a href="#" className="social-link" aria-label="Twitter">
                 🐦
               </a>
-              <a href="#" className="social-link">
+              <a href="#" className="social-link" aria-label="LinkedIn">
                 💼
               </a>
             </div>
@@ -33,21 +33,21 @@ const Footer = () => {
 
           <div className="footer__links">
             <div className="footer__column">
-              <h4 className="footer__heading">Company</h4>
+              <h4 className="footer__heading">Về chúng tôi</h4>
               <ul className="footer__list">
                 <li>
                   <a href="#" className="footer__link">
-                    About Us
+                    Giới thiệu
                   </a>
                 </li>
                 <li>
                   <a href="#" className="footer__link">
-                    Careers
+                    Tuyển dụng
                   </a>
                 </li>
                 <li>
                   <a href="#" className="footer__link">
-                    Press
+                    Truyền thông
                   </a>
                 </li>
                 <li>
@@ -57,64 +57,66 @@ const Footer = () => {
                 </li>
                 <li>
                   <a href="#" className="footer__link">
-                    Partners
+                    Đối tác
                   </a>
                 </li>
               </ul>
             </div>
 
             <div className="footer__column">
-              <h4 className="footer__heading">Support</h4>
+              <h4 className="footer__heading">Hỗ trợ</h4>
               <ul className="footer__list">
                 <li>
                   <a href="#" className="footer__link">
-                    Help Center
+                    Trung tâm trợ giúp
                   </a>
                 </li>
                 <li>
                   <a href="#" className="footer__link">
-                    Safety
+                    An toàn
                   </a>
                 </li>
                 <li>
                   <a href="#" className="footer__link">
-                    Cancellation Options
+                    Chính sách hủy
                   </a>
                 </li>
                 <li>
                   <a href="#" className="footer__link">
-                    Contact Us
+                    Liên hệ
                   </a>
                 </li>
                 <li>
                   <a href="#" className="footer__link">
-                    Accessibility
+                    Hỗ trợ tiếp cận
                   </a>
                 </li>
               </ul>
             </div>
 
             <div className="footer__column">
-              <h4 className="footer__heading">Stay Updated</h4>
+              <h4 className="footer__heading">Nhận thông tin mới</h4>
               <ul className="footer__list">
                 <li>
                   <a href="#" className="footer__link">
-                    Subscribe to our newsletter for travel
+                    Đăng ký nhận bản tin du lịch
                   </a>
                 </li>
                 <li>
                   <a href="#" className="footer__link">
-                    tips and exclusive offers
+                    Ưu đãi & mẹo du lịch độc quyền
                   </a>
                 </li>
               </ul>
               <div className="footer__newsletter">
                 <input
                   type="email"
-                  placeholder="Your email"
+                  placeholder="Nhập email của bạn"
                   className="newsletter-input"
                 />
-                <button className="newsletter-btn">→</button>
+                <button className="newsletter-btn" aria-label="Đăng ký">
+                  &rarr;
+                </button>
               </div>
             </div>
           </div>
@@ -122,17 +124,17 @@ const Footer = () => {
 
         <div className="footer__bottom">
           <div className="footer__copyright">
-            <p>© 2024 QuickStay. All rights reserved.</p>
+            <p>© 2024 QuickStay. Đã đăng ký bản quyền.</p>
           </div>
           <div className="footer__legal">
             <a href="#" className="footer__link">
-              Privacy
+              Chính sách bảo mật
             </a>
             <a href="#" className="footer__link">
-              Terms
+              Điều khoản
             </a>
             <a href="#" className="footer__link">
-              Sitemap
+              Sơ đồ trang
             </a>
           </div>
         </div>
