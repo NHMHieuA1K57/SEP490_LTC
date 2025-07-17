@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const { findUserByEmail, updatePassword, findUserById, findLoyaltyPointsByUserId, updateUserProfile } = require('../repositories/authRepository');
 const { sendOTPEmail } = require('./otpMailService');
 const cloudinary = require('../config/cloudinary');
@@ -33,6 +34,9 @@ const register = async ({ email, password, name, role, phone }) => {
     status: 'pending',
     isEmailVerified: false,
     createdAt: new Date(),
+    profile: {
+      updatedAt: new Date(),
+    },
   });
   await user.save();
 
@@ -56,13 +60,13 @@ const register = async ({ email, password, name, role, phone }) => {
     return {
       userId: user._id,
       otp,
-      message: 'Đăng ký thành công! Vui lòng kiểm tra email để nhận OTP xác thực.'
+      message: 'Đăng ký thành công! Vui lòng kiểm tra email để nhận OTP xác thực.',
     };
   }
 
   return {
     userId: user._id,
-    message: 'Đăng ký thành công bằng số điện thoại.'
+    message: 'Đăng ký thành công bằng số điện thoại.',
   };
 };
 
@@ -140,7 +144,6 @@ const forgotPassword = async (email) => {
     throw { status: 404, message: 'Email không tồn tại' };
   }
 
-  // Generate and send reset code with forgot-password template
   const expiryMinutes = 10;
   const { success, otp, expiryTime, messageId } = await sendOTPEmail(email, user.name, 6, expiryMinutes, 'forgot-password');
   if (!success) {
@@ -150,25 +153,22 @@ const forgotPassword = async (email) => {
   return { message: 'Mã đặt lại mật khẩu đã được gửi qua email. Vui lòng kiểm tra hộp thư.', messageId, otp, expiryTime };
 };
 
-const resetPassword = async (email, resetCode, newPassword, expiryTime) => {
+const resetPassword = async (email, resetCode, newPassword, expiryTime, otp) => {
   const user = await findUserByEmail(email);
   if (!user) {
     throw { status: 404, message: 'Email không tồn tại' };
   }
 
-  // Validate reset code and expiry time (temporary logic)
   if (new Date() > new Date(expiryTime)) {
     throw { status: 400, message: 'Mã đặt lại đã hết hạn' };
   }
-  if (resetCode !== resetCode) { // Fixed typo: This should compare with the expected OTP, but since otp is not passed here, we use resetCode as the user input
+  if (resetCode !== otp) {
     throw { status: 400, message: 'Mã đặt lại không đúng' };
   }
 
-  // Hash new password
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-  // Update password
   await updatePassword(user._id, hashedPassword);
   return { message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.' };
 };
@@ -191,63 +191,78 @@ const getProfile = async (userId) => {
     address: user.profile.address,
     dateOfBirth: user.profile.dateOfBirth,
     avatar: user.profile.avatar,
-    loyaltyPoints: loyaltyPoints ? {
-      points: loyaltyPoints.points,
-      history: loyaltyPoints.history
-    } : null
+    loyaltyPoints: loyaltyPoints
+      ? {
+          points: loyaltyPoints.points,
+          history: loyaltyPoints.history,
+        }
+      : null,
   };
 };
 
 const updateProfile = async (userId, updates, files) => {
-  const profileUpdates = {};
-    if (updates.name) profileUpdates.name = updates.name;
-  if (updates.address) profileUpdates['profile.address'] = updates.address;
-  if (updates.dateOfBirth) profileUpdates['profile.dateOfBirth'] = updates.dateOfBirth;
-
-  if (files && files.length > 0) {
-    const file = files[0];
-
-    try {
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: 'SEP490/avatars', 
-            resource_type: 'image'
-          },
-          (error, result) => {
-            if (error) {
-              console.error('Cloudinary upload error:', error);
-              reject(error);
-            } else {
-              resolve(result);
-            }
-          }
-        );
-        stream.end(file.buffer);
-      });
-
-      profileUpdates['profile.avatar'] = result.secure_url;
-
-    } catch (error) {
-      console.error('Upload error details:', error);
-      throw { status: 500, message: 'Lỗi khi upload ảnh lên Cloudinary' };
+  try {
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      throw { status: 400, message: 'ID người dùng không hợp lệ' };
     }
-  }
-  profileUpdates['profile.updatedAt'] = new Date();
-  const updatedUser = await updateUserProfile(userId, profileUpdates);
-  if (!updatedUser) {
-    throw { status: 404, message: 'Người dùng không tồn tại' };
-  }
-  return {
-    email: updatedUser.email,
-    phone: updatedUser.phone,
-    name: updatedUser.name,
-    address: updatedUser.profile.address,
-    dateOfBirth: updatedUser.profile.dateOfBirth,
-    avatar: updatedUser.profile.avatar
-  };
-};
+    const profileUpdates = {};
+    if (updates.name) profileUpdates.name = updates.name;
+    if (updates.address) profileUpdates['profile.address'] = updates.address;
+    if (updates.dateOfBirth) profileUpdates['profile.dateOfBirth'] = updates.dateOfBirth;
 
+    if (files && files.length > 0) {
+      const file = files[0];
+      try {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: 'SEP490/avatars',
+              resource_type: 'image',
+            },
+            (error, result) => {
+              if (error) {
+                console.error('Lỗi tải lên Cloudinary:', error);
+                reject(error);
+              } else {
+                resolve(result);
+              }
+            }
+          );
+          stream.end(file.buffer);
+        });
+        profileUpdates['profile.avatar'] = result.secure_url;
+      } catch (error) {
+        console.error('Chi tiết lỗi tải lên Cloudinary:', error);
+        throw { status: 500, message: 'Lỗi khi tải ảnh lên Cloudinary' };
+      }
+    }
+    profileUpdates['profile.updatedAt'] = new Date();
+
+    const userExists = await User.findById(userId).lean();
+    if (!userExists) {
+      throw { status: 404, message: 'Người dùng không tồn tại trong cơ sở dữ liệu' };
+    }
+
+    const updatedUser = await updateUserProfile(userId, profileUpdates);
+    if (!updatedUser) {
+      throw { status: 404, message: 'Không thể cập nhật hồ sơ, người dùng không tồn tại' };
+    }
+    if (!updatedUser.email || !updatedUser.profile) {
+      throw { status: 500, message: 'Dữ liệu người dùng không đầy đủ sau khi cập nhật' };
+    }
+    return {
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      name: updatedUser.name,
+      address: updatedUser.profile.address,
+      dateOfBirth: updatedUser.profile.dateOfBirth,
+      avatar: updatedUser.profile.avatar,
+    };
+  } catch (error) {
+    console.error('Lỗi trong updateProfile:', error);
+    throw error.status ? error : { status: 500, message: `Lỗi hệ thống khi cập nhật hồ sơ: ${error.message}` };
+  }
+};
 module.exports = {
   register,
   verifyOtp,
@@ -255,5 +270,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   getProfile,
-  updateProfile
+  updateProfile,
 };

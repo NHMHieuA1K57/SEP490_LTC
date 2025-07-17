@@ -1,4 +1,4 @@
-const { registerBusinessUserService } = require('../services/businessUserService');
+const { registerBusinessUserService, updateBusinessProfileService } = require('../services/businessUserService');
 
 const registerBusinessUser = async (req, res) => {
   try {
@@ -6,8 +6,19 @@ const registerBusinessUser = async (req, res) => {
     return res.status(201).json(result);
   } catch (error) {
     console.error('Business User Registration error:', error.message);
-    return res.status(500).json({ success: false, message: 'Lỗi server, vui lòng đăng ký lại sau' });
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
-module.exports = { registerBusinessUser };
+const updateBusinessProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const result = await updateBusinessProfileService(userId, req.body, req.files);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error('Business Profile Update error:', error.message);
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = { registerBusinessUser, updateBusinessProfile };

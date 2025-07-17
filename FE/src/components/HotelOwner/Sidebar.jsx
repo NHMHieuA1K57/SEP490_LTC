@@ -1,12 +1,13 @@
 import React from 'react'
 import './Sidebar.css'
 import { NavLink } from 'react-router-dom'
+import {assets} from '../../assets/assets'
 
 const Sidebar = () => {
   const sidebarLinks = [
     { name: 'Dashboard', path: '', icon: '🏨' },
-    { name: 'Add Room', path: 'add-room', icon: '🏨' },
-    { name: 'List Rooms', path: 'list-rooms', icon: '🏨' },
+    { name: 'Add Room', path: 'add-room', icon: assets.addRoomIcon },
+    { name: 'List Rooms', path: 'list-rooms', icon: assets.listRoomIcon },
   ]
 
   return (

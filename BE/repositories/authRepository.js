@@ -2,19 +2,26 @@ const User = require('../models/User');
 const LoyaltyPoints = require('../models/LoyaltyPoints');
 
 const findUserById = async (userId) => {
-  return await User.findById(userId).select('email phone name profile role status isEmailVerified');
+  if (!isValidObjectId(userId)) throw new Error('Invalid user ID');
+  return await User.findById(userId).select('email phone name profile role status isEmailVerified businessInfo');
 };
+
 
 const findLoyaltyPointsByUserId = async (userId) => {
   return await LoyaltyPoints.findOne({ userId }).select('points history');
 };
 
 const updateUserProfile = async (userId, updates) => {
-  return await User.findByIdAndUpdate(
-    userId,
-    { $set: updates },
-    { new: true, runValidators: true }
-  ).select('email phone name profile');
+  try {
+    return await User.findByIdAndUpdate(
+      userId,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).select('email phone name profile businessInfo');
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    throw error;
+  }
 };
 
 const findUserByEmail = async (email) => {
@@ -25,25 +32,40 @@ const findPendingBusinessUsers = async () => {
   return await User.find({
     role: { $in: ['hotel_owner', 'tour_provider'] },
     status: 'pending',
-    isBusinessVerified: false
-  }).select('email name role taxId businessLicenseImage createdAt').lean();
+    'businessInfo.isVerified': false
+  }).select('email name role businessInfo.taxId businessInfo.businessLicenseImage businessInfo.website createdAt').lean();
 };
 
 const createUser = async (userData) => {
-  const user = new User(userData);
-  return await user.save();
+  try {
+    const user = new User(userData);
+    return await user.save();
+  } catch (error) {
+    console.error('Error creating user:', error);
+    throw error;
+  }
 };
 
 const updateUser = async (user) => {
-  return await User.findByIdAndUpdate(user._id, user, { new: true });
+  try {
+    return await User.findByIdAndUpdate(user._id, user, { new: true });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    throw error;
+  }
 };
 
 const updatePassword = async (userId, hashedPassword) => {
-  return await User.findByIdAndUpdate(
-    userId,
-    { password: hashedPassword },
-    { new: true }
-  );
+  try {
+    return await User.findByIdAndUpdate(
+      userId,
+      { password: hashedPassword },
+      { new: true }
+    );
+  } catch (error) {
+    console.error('Error updating password:', error);
+    throw error;
+  }
 };
 
 module.exports = {

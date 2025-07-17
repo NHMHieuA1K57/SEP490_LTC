@@ -13,7 +13,7 @@ function verifyOTP(key, otp) {
     return { valid: false, reason: 'OTP đã hết hạn' };
   }
   if (record.otp !== otp) return { valid: false, reason: 'OTP không đúng' };
-  otpStore.delete(key); // Xác thực thành công thì xóa luôn
+  otpStore.delete(key); 
   return { valid: true };
 }
 

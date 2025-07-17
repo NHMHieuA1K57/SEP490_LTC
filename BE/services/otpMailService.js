@@ -169,8 +169,8 @@ const sendOTPEmail = async (userEmail, userName = 'Người dùng', otpLength = 
     const result = await sendMail(userEmail, subject, htmlTemplate);
     
     if (result.success) {
-      console.log(`✅ OTP email sent successfully to ${userEmail}`);
-      console.log(`🔑 Generated OTP: ${otp} (expires in ${expiryMinutes} minutes)`);
+      // console.log(`✅ OTP email sent successfully to ${userEmail}`);
+      // console.log(`🔑 Generated OTP: ${otp} (expires in ${expiryMinutes} minutes)`);
       return { 
         success: true, 
         otp, 

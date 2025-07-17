@@ -1,14 +1,15 @@
 import React from "react";
 import "./HotelReg.css";
+import { assets } from "../../assets/assets";
 
 const HotelReg = () => {
     return (
         <div className="modal-overlay">
             <form className="hotel-form">
-                <img src="" alt="reg-image" className="reg-image" />
+                <img src={assets.regImage} alt="reg-image" className="reg-image" />
 
                 <div className="form-content">
-                    <img src="" alt="close-icon" className="close-icon" />
+                    <img src={assets.closeIcon} alt="close-icon" className="close-icon" />
                     <p className="form-title">Register Your Hotel</p>
 
                     <div className="form-group">

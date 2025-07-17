@@ -13,6 +13,6 @@ router.post('/reset-password', resetPasswordValidation, authController.resetPass
 router.post('/refresh-token', authController.refreshToken);
 router.post('/logout', authMiddleware, roleMiddleware(['customer', 'hotel_owner', 'tour_provider', 'admin']), authController.logout);
 router.get('/profile', authMiddleware, roleMiddleware(['customer', 'hotel_owner', 'tour_provider']), authController.getProfile);
-router.put('/update-profile', authMiddleware, roleMiddleware(['customer', 'hotel_owner', 'tour_provider']), upload.single('avatar'), authController.updateProfile);
+router.put('/update-profile', authMiddleware, roleMiddleware(['customer']), upload.single('avatar'), authController.updateProfile);
 
 module.exports = router;
