@@ -1,0 +1,28 @@
+# Sử dụng LF (Line Feed) cho tất cả các file văn bản
+* text eol=lf
+
+# Các file nguồn phổ biến
+*.js     text eol=lf
+*.jsx    text eol=lf
+*.ts     text eol=lf
+*.tsx    text eol=lf
+*.json   text eol=lf
+*.css    text eol=lf
+*.scss   text eol=lf
+*.html   text eol=lf
+*.md     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.sh     text eol=lf
+*.xml    text eol=lf
+
+# Không tự động chuyển đổi line endings cho các file nhị phân
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.pdf    binary
+*.zip    binary
+*.exe    binary
+*.dll    binary

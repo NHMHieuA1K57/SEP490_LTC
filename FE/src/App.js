@@ -10,7 +10,8 @@ import Payment from "./pages/Payment/Payment";
 import About from "./pages/About/About";
 import Destination from "./pages/Destination/Destination";
 import "./App.scss";
-import HotelReg from "./components/HotelOwner/HotelReg";
+
+import Register from "./pages/Auth/RegisterPage";
 import Layout from "./pages/HotelOwner/Layout";
 import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
@@ -35,7 +36,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/destination" element={<Destination />} />
 
-            <Route path="/register" element={<HotelReg />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/owner" element={<Layout />}>
               <Route index element={<Dashboard />} />
               <Route path="add-room" element={<AddRoom />} />
