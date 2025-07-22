@@ -1,5 +1,13 @@
 import React, { useState } from "react";
 import "./RegisterBusinessUserForm.css";
+import {
+  requestOtpRegister,
+  registerWithOtp,
+  requestOtpLogin,
+  loginWithOtp,
+} from "../../server/authAPI";
+import OtpVerification from "../OtpVerification/OtpVerification.jsx";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterBusinessUserForm({
   onSubmit,
@@ -7,15 +15,46 @@ export default function RegisterBusinessUserForm({
 }) {
   const [email, setEmail] = useState("");
   const [showOtherOptions, setShowOtherOptions] = useState(false);
+  const [step, setStep] = useState(1); // 1: nhập email, 2: nhập otp
+  const [otp, setOtp] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showOtp, setShowOtp] = useState(false);
+  const navigate = useNavigate();
 
   const isLoginMode = mode === "login";
 
-  const handleEmailSubmit = (e) => {
+  const handleEmailSubmit = async (e) => {
     e.preventDefault();
     if (email) {
-      // Xử lý tiếp tục với email
-      console.log("Tiếp tục với email:", email);
-      onSubmit({ email });
+      setLoading(true);
+      let res;
+      if (isLoginMode) {
+        res = await requestOtpLogin(email);
+      } else {
+        res = await requestOtpRegister(email);
+      }
+      setLoading(false);
+      setMessage(res.message);
+      if (res.success) setShowOtp(true); // chuyển sang OTP component
+    }
+  };
+
+  const handleOtpSubmit = async (e) => {
+    e.preventDefault();
+    if (otp && email) {
+      setLoading(true);
+      let res;
+      if (isLoginMode) {
+        res = await loginWithOtp(email, otp);
+      } else {
+        res = await registerWithOtp(email, otp);
+      }
+      setLoading(false);
+      setMessage(res.message);
+      if (res.success) {
+        onSubmit && onSubmit({ email });
+      }
     }
   };
 
@@ -24,6 +63,21 @@ export default function RegisterBusinessUserForm({
     // Xử lý đăng nhập social
     onSubmit({ provider });
   };
+
+  if (showOtp) {
+    return (
+      <OtpVerification
+        email={email}
+        onBack={() => setShowOtp(false)}
+        onSuccess={(user) => {
+          localStorage.setItem("user", JSON.stringify(user));
+          onSubmit && onSubmit(user);
+          navigate("/");
+        }}
+        mode={isLoginMode ? "login" : "signup"}
+      />
+    );
+  }
 
   return (
     <div className="register-form-container">
@@ -72,23 +126,53 @@ export default function RegisterBusinessUserForm({
         </div>
 
         {/* Email Form */}
-
-        <div className="email-input-group">
-          <label className="email-label" htmlFor="email">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            placeholder="Nhập email của bạn"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <button type="submit" className="continue-btn">
-            {isLoginMode ? "Đăng nhập" : "Tiếp tục"}
-          </button>
-        </div>
+        {step === 1 && (
+          <form className="email-input-group" onSubmit={handleEmailSubmit}>
+            <label className="email-label" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Nhập email của bạn"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+            <button type="submit" className="continue-btn" disabled={loading}>
+              {loading ? "Đang gửi..." : isLoginMode ? "Đăng nhập" : "Tiếp tục"}
+            </button>
+          </form>
+        )}
+        {step === 2 && (
+          <form className="email-input-group" onSubmit={handleOtpSubmit}>
+            <label className="email-label" htmlFor="otp">
+              Nhập mã OTP gửi về email
+            </label>
+            <input
+              id="otp"
+              type="text"
+              placeholder="Nhập mã OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              required
+            />
+            <button type="submit" className="continue-btn" disabled={loading}>
+              {loading ? "Đang xác thực..." : "Xác nhận"}
+            </button>
+          </form>
+        )}
+        {message && (
+          <div
+            style={{
+              color: step === 2 ? "#007bff" : "red",
+              textAlign: "center",
+              margin: "8px 0",
+            }}
+          >
+            {message}
+          </div>
+        )}
 
         {/* Other Login Options */}
         <div className="other-login-options">

@@ -18,6 +18,7 @@ import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
 
 import Hero from "./components/Hero/Hero";
+import Account from "./pages/Account";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/bookings" element={<MyBookings />} />
             <Route path="/login" element={<Login />} />
             <Route path="/payment" element={<Payment />} />
+            <Route path="/account" element={<Account />} />
 
             <Route path="/about" element={<About />} />
             <Route path="/destination" element={<Destination />} />
