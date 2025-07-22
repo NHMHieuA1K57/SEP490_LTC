@@ -1,10 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import "./Account.scss";
 
 const getInitial = (email) => (email ? email[0].toUpperCase() : "U");
 
 const Account = () => {
-  const email = "abc@gmaii.com";
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    } else {
+      setUser(null);
+    }
+  }, []);
+  const email = user?.email || "";
+
   const name = "abc";
   return (
     <div className="account-page">
@@ -63,7 +74,9 @@ const Account = () => {
             </div>
           </section>
 
-          <div className="account-info-label">Phương thức thanh toán</div>
+          <div className="account-info-label account-info-label-large">
+            Phương thức thanh toán
+          </div>
           <section className="account-info-row">
             <div className="account-info-label">
               Lưu thông tin thẻ tín dụng của tôi
@@ -76,7 +89,9 @@ const Account = () => {
             </div>
           </section>
 
-          <div className="account-info-label">Đăng ký nhận thư điện tử</div>
+          <div className="account-info-label account-info-label-large">
+            Đăng ký nhận thư điện tử
+          </div>
 
           <section className="account-info-row account-info-row-newsletter">
             <div className="account-info-label account-info-label-newsletter">
