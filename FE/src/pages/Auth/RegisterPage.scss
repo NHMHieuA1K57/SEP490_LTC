@@ -3,8 +3,8 @@
   align-items: flex-start;
   justify-content: center;
   background: white;
-  padding: 20px;
-  padding-top: 20px;
+  padding: 10px;
+  padding-top: 10px;
   max-height: calc(100vh - 100px);
 }
 
@@ -14,7 +14,7 @@
 }
 
 .form-container {
-  padding: 40px 20px;
+  padding: 30px 20px;
 }
 
 .register-form-wrapper {
@@ -23,9 +23,9 @@
 
 @media (max-width: 480px) {
   .register-page {
-    padding: 10px;
+    padding: 5px;
   }
   .form-container {
-    padding: 30px 15px;
+    padding: 20px 10px;
   }
 }
