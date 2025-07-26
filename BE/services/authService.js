@@ -209,7 +209,7 @@ const updateProfile = async (userId, updates, files) => {
     if (updates.name) profileUpdates.name = updates.name;
     if (updates.address) profileUpdates['profile.address'] = updates.address;
     if (updates.dateOfBirth) profileUpdates['profile.dateOfBirth'] = updates.dateOfBirth;
-
+    if (updates.phone) profileUpdates.phone = updates.phone;
     if (files && files.length > 0) {
       const file = files[0];
       try {

@@ -66,14 +66,20 @@ const deleteHotel = async (req, res) => {
   }
 };
 
-const searchHotelsHandler = async (req, res) => {
+const searchHotelsController = async (req, res) => {
   try {
-    const { page, limit, ...filters } = req.query;
-    const response = await hotelService.searchHotelsService(filters, page, limit);
-    return res.status(200).json(response);
+    const filters = req.query;
+    const result = await hotelService.searchHotelsService(filters);
+    return res.status(200).json(result);
   } catch (error) {
-    console.error('Lỗi khi tìm kiếm khách sạn:', error.message);
-    return res.status(400).json({ success: false, message: error.message });
+    console.error('Lỗi tìm kiếm:', error);
+
+    const isUserInputError = error.message.includes('từ khóa tìm kiếm');
+
+    return res.status(isUserInputError ? 400 : 500).json({
+      success: false,
+      message: error.message || 'Lỗi hệ thống khi tìm kiếm khách sạn'
+    });
   }
 };
 
@@ -84,5 +90,5 @@ module.exports = {
   getHotelDetails,
   updateHotel,
   deleteHotel,
-  searchHotelsHandler
+  searchHotelsController
 };

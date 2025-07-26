@@ -1,4 +1,7 @@
 const bookingService = require('../services/bookingService');
+const Booking = require('../models/Booking');
+const Hotel = require('../models/Hotel');
+const Room = require('../models/Room');
 
 const getPendingBookings = async (req, res) => {
   try {
@@ -81,11 +84,67 @@ const createBooking = async (req, res) => {
   }
 };
 
+const getCustomerBookingsHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const bookings = await Booking.find({ userId })
+      .sort({ createdAt: -1 })
+      .populate('hotelId', 'name address images')
+      .select('-__v');
+
+    const simplified = bookings.map(booking => ({
+      bookingId: booking._id,
+      hotelName: booking.hotelId?.name,
+      address: booking.hotelId?.address,
+      thumbnail: booking.hotelId?.images?.[0] || null,
+      checkInDate: booking.details?.checkInDate,
+      checkOutDate: booking.details?.checkOutDate,
+      roomType: booking.details?.roomType,
+      numberOfPeople: booking.details?.numberOfPeople,
+      status: booking.status,
+      totalPrice: booking.totalPrice,
+      bookingCode: booking.paymentInfo?.bookingCode,
+      createdAt: booking.createdAt
+    }));
+
+    res.status(200).json({ success: true, data: simplified });
+  } catch (error) {
+    console.error('Error getCustomerBookingsHistory:', error.message);
+    res.status(500).json({ success: false, message: 'Lỗi server khi lấy lịch sử đặt phòng' });
+  }
+};
+
+
+const getCustomerBookingDetail = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const bookingId = req.params.id;
+
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      return res.status(400).json({ success: false, message: 'ID đặt phòng không hợp lệ' });
+    }
+
+    const booking = await Booking.findOne({ _id: bookingId, userId })
+      .populate('hotelId', 'name address images')
+      .select('-__v');
+
+    if (!booking) {
+      return res.status(404).json({ success: false, message: 'Không tìm thấy đặt phòng' });
+    }
+
+    res.status(200).json({ success: true, data: booking });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 module.exports = {
   getPendingBookings,
   getBookingsByOwnerHotels,
   getBookingDetails,
   updateBookingStatus,
-  createBooking
+  createBooking,
+  getCustomerBookingsHistory,
+  getCustomerBookingDetail
 };

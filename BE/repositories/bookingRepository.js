@@ -244,7 +244,23 @@ updateRoomAvailability: async (roomId, checkInDate, checkOutDate, numberOfPeople
     current.setDate(current.getDate() + 1);
   }
 },
+  decrementRoomAvailability: async (roomId, checkInDate, checkOutDate, numberOfPeople, session) => {
+    const start = new Date(checkInDate);
+    const end = new Date(checkOutDate);
+    let current = new Date(start);
 
+    while (current < end) {
+      await Room.updateOne(
+        {
+          _id: roomId,
+          'availability.date': current
+        },
+        { $inc: { 'availability.$.quantity': -numberOfPeople } },
+        { session }
+      );
+      current.setDate(current.getDate() + 1);
+    }
+  },
 };
 
 module.exports = BookingRepository;
