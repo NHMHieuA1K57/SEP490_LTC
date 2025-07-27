@@ -14,7 +14,7 @@
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 2200px;
   margin: 0 auto;
   padding: 0 16px;
 }
@@ -97,7 +97,7 @@
 /* Main Content Layout */
 .main-content {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  /* grid-template-columns: 2fr 1fr; */
   gap: 32px;
   margin-bottom: 48px;
 }
