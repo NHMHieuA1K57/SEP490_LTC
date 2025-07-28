@@ -78,7 +78,7 @@
 }
 
 .search-container {
-  max-width: 1800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -137,7 +137,7 @@
 
 /* Main Container */
 .main-container {
-  max-width: 2200px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
