@@ -7,19 +7,16 @@ const authMiddleware = async (req, res, next) => {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ success: false, message: 'Invalid authorization header' });
   }
-
   const token = authHeader.split(' ')[1];
   if (!token) {
     return res.status(401).json({ success: false, message: 'Access token is required' });
   }
-
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     const user = await User.findById(decoded.id).select('-password');
     if (!user) {
       return res.status(401).json({ success: false, message: 'User not found' });
     }
-
     req.user = user;
     next();
   } catch (error) {
@@ -31,17 +28,28 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
-const roleMiddleware = (allowedRoles) => {
+const roleMiddleware = (...allowedRoles) => {
   return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: 'User not authenticated' });
-    }
+    console.log('User role:', req.user?.role);
+    console.log('Allowed roles:', allowedRoles);
+    try {
+      if (!req.user || !req.user.role) {
+        return res.status(401).json({ message: 'Không xác định được vai trò người dùng' });
+      }
 
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({ success: false, message: 'You do not have permission to access this resource' });
-    }
+      const userRole = req.user.role;
 
-    next();
+      if (!allowedRoles.includes(userRole)) {
+        return res.status(403).json({
+          message: `User role: ${userRole} - Allowed roles: [ ${allowedRoles.join(', ')} ]`
+        });
+      }
+
+      next();
+    } catch (err) {
+      console.error('Role middleware error:', err);
+      res.status(500).json({ message: 'Lỗi phân quyền' });
+    }
   };
 };
 

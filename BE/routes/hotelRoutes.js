@@ -12,7 +12,7 @@ const {
 const upload = require('../utils/upload');
 
 // PUBLIC ROUTES
-router.get('/search/hotels', hotelController.searchHotelsHandler);
+router.get('/search/hotels', hotelController.searchHotelsController);
 router.get('/:hotelId', hotelController.getHotelDetails);
 router.get('/:hotelId/rooms/:roomId', roomController.getRoomDetails);
 
