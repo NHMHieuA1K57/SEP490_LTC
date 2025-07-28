@@ -286,6 +286,7 @@ const registerWithOtp = async (req, res) => {
     // Tạo user không cần password
     const user = new (require("../models/User"))({
       email,
+      phone: "",
       name: name || "",
       role: "customer",
       status: "active",
@@ -331,12 +332,10 @@ const requestOtpLogin = async (req, res) => {
       "login"
     );
     if (!success) {
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "Không thể gửi OTP, vui lòng thử lại",
-        });
+      return res.status(500).json({
+        success: false,
+        message: "Không thể gửi OTP, vui lòng thử lại",
+      });
     }
     saveOTP(email, otp, expiryMinutes);
     return res
@@ -381,6 +380,7 @@ const loginWithOtp = async (req, res) => {
       message: "Đăng nhập thành công!",
       user: {
         id: user._id,
+        phone: user.phone,
         email: user.email,
         name: user.name,
         role: user.role,

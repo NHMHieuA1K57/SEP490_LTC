@@ -53,6 +53,11 @@ export default function RegisterBusinessUserForm({
       setLoading(false);
       setMessage(res.message);
       if (res.success) {
+        // Lưu accessToken nếu có (kiểm tra cả res.data.accessToken và res.accessToken)
+        const token = res.accessToken || (res.data && res.data.accessToken);
+        if (token) {
+          localStorage.setItem("accessToken", token);
+        }
         onSubmit && onSubmit({ email });
       }
     }

@@ -144,6 +144,65 @@
   flex-direction: column;
   justify-content: center;
 }
+
+.edit-name-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+  background: #f4f8ff;
+  padding: 18px 16px;
+  /* border-radius: 8px; */
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.07);
+  max-width: 320px;
+}
+.edit-name-form label {
+  font-size: 15px;
+  color: #1976d2;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.edit-name-form input {
+  padding: 7px 32px 7px 12px;
+  border: 1px solid #bcd2ee;
+  border-radius: 6px;
+  font-size: 16px;
+  margin-bottom: 8px;
+  outline: none;
+  transition: border 0.18s;
+}
+.edit-name-form input:focus {
+  border-color: #1976d2;
+}
+.edit-name-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.edit-name-form-actions button {
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 7px 20px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+.edit-name-form-actions button[type="button"] {
+  background: #e0e0e0;
+  color: #222;
+}
+.edit-name-form-actions button:hover {
+  background: #1251a3;
+  color: #fff;
+}
+.edit-name-form-actions button[type="button"]:hover {
+  background: #bdbdbd;
+  color: #222;
+}
+
 .account-info-name {
   font-size: 22px;
   font-weight: 700;
