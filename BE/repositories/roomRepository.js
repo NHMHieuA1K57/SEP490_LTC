@@ -124,17 +124,30 @@ const updateRoomPrice = async (hotelId, roomId, ownerId, price) => {
 };
 
 const findAvailableRoom = async (roomId, checkInDate, checkOutDate, numberOfPeople, session) => {
-  return await Room.findOne({
+  const checkIn = new Date(checkInDate);
+  const checkOut = new Date(checkOutDate);
+
+  const dates = [];
+  for (let d = new Date(checkIn); d < checkOut; d.setDate(d.getDate() + 1)) {
+    dates.push(new Date(d));
+  }
+  const room = await Room.findOne({
     _id: roomId,
     status: 'active',
-    'availability.date': {
-      $gte: new Date(checkInDate),
-      $lte: new Date(checkOutDate),
-    },
-    'availability.quantity': { $gte: numberOfPeople },
     maxPeople: { $gte: numberOfPeople },
+    availability: {
+      $all: dates.map(date => ({
+        $elemMatch: {
+          date: date,
+          quantity: { $gte: numberOfPeople }
+        }
+      }))
+    }
   }).session(session);
+
+  return room;
 };
+
 
 const restoreAvailability = async (roomId, checkInDate, checkOutDate, numberOfPeople, session) => {
   return await Room.updateOne(
@@ -153,6 +166,7 @@ const restoreAvailability = async (roomId, checkInDate, checkOutDate, numberOfPe
     { session }
   );
 };
+
 module.exports = {
   createRoom,
   updateRoom,

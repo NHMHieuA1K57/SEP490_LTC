@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const PayOS = require('@payos/node');
 const User = require('../models/User');
 const Hotel = require('../models/Hotel');
+const Booking = require('../models/Booking');
 require('dotenv').config();
 
 const payOS = new PayOS(
@@ -98,9 +99,11 @@ const createBookingService = async (userId, bookingData) => {
       specialRequests = ''
     } = bookingData;
 
-    if (!mongoose.Types.ObjectId.isValid(userId) ||
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
       !mongoose.Types.ObjectId.isValid(hotelId) ||
-      !mongoose.Types.ObjectId.isValid(roomId)) {
+      !mongoose.Types.ObjectId.isValid(roomId)
+    ) {
       throw new Error('ID người dùng, khách sạn hoặc phòng không hợp lệ');
     }
 
@@ -112,6 +115,19 @@ const createBookingService = async (userId, bookingData) => {
     const checkOut = new Date(checkOutDate);
     if (isNaN(checkIn) || isNaN(checkOut) || checkIn >= checkOut) {
       throw new Error('Ngày check-in/check-out không hợp lệ');
+    }
+
+    const existingBooking = await Booking.findOne({
+      userId,
+      hotelId,
+      roomId,
+      'details.checkInDate': checkIn,
+      'details.checkOutDate': checkOut,
+      status: { $in: ['pending', 'confirmed'] }
+    }).session(session);
+
+    if (existingBooking) {
+      throw new Error('Bạn đã đặt phòng này trong khoảng thời gian đó. Vui lòng không đặt trùng.');
     }
 
     const room = await roomRepository.findAvailableRoom(
@@ -127,25 +143,12 @@ const createBookingService = async (userId, bookingData) => {
     if (!hotel) throw new Error('Khách sạn không tồn tại hoặc không hoạt động');
 
     let totalPrice = room.price * numberOfPeople;
-    let discount = 0;
+    let discountAmount = 0;
 
     if (promotionCode) {
-      const promotion = await Promotion.findOne({
-        code: promotionCode,
-        type: 'hotel',
-        hotelId,
-        startDate: { $lte: new Date() },
-        endDate: { $gte: new Date() },
-        usedCount: { $lt: '$maxUses' }
-      }).session(session);
-
-      if (!promotion) throw new Error('Mã khuyến mãi không hợp lệ hoặc đã hết hạn');
-
-      discount = promotion.discountAmount || (totalPrice * (promotion.discountPercentage / 100));
+      const discount = await bookingRepository.applyPromotion(promotionCode, hotelId, session);
+      discountAmount = discount || 0;
       totalPrice = Math.max(0, totalPrice - discount);
-
-      promotion.usedCount += 1;
-      await promotion.save({ session });
     }
 
     const owner = await User.findById(hotel.ownerId).session(session);
@@ -180,8 +183,6 @@ const createBookingService = async (userId, bookingData) => {
       }
     };
 
-    console.log('📝 Booking payload:', bookingPayload);
-
     const createdBookings = await bookingRepository.createBooking(bookingPayload, session);
     if (!Array.isArray(createdBookings) || createdBookings.length === 0) {
       throw new Error('Tạo booking thất bại');
@@ -197,13 +198,11 @@ const createBookingService = async (userId, bookingData) => {
       session
     );
 
-    await bookingRepository.updateRoomAvailability(roomId, checkInDate, checkOutDate, numberOfPeople, session);
+    await bookingRepository.decrementRoomAvailability(roomId, checkInDate, checkOutDate, numberOfPeople, session);
 
-    if (!room.roomType || typeof room.price !== 'number') {
-      throw new Error('Dữ liệu phòng thiếu roomType hoặc price');
-    }
-    const rawDescription = `Phòng ${room.roomType} tại ${hotel.name}`;
+    const rawDescription = `${room.roomType} tại ${hotel.name}`;
     const description = rawDescription.length > 25 ? rawDescription.slice(0, 25) : rawDescription;
+
     const paymentData = {
       orderCode: parseInt(bookingCode.replace('BOOK', '')),
       amount: totalPrice,
@@ -217,23 +216,13 @@ const createBookingService = async (userId, bookingData) => {
       ],
       cancelUrl: process.env.CANCEL_URL || 'https://localhost:3000/cancel',
       returnUrl: process.env.RETURN_URL || 'https://localhost:3000/success',
+      notifyUrl: process.env.NOTIFY_URL,
       buyerName,
       buyerEmail,
       buyerPhone,
       buyerAddress,
       expiredAt: Math.floor(Date.now() / 1000) + 15 * 60
     };
-
-    // console.log('📦 Gửi PayOS:', paymentData);
-
-    if (!room?.roomType || typeof room.price !== 'number' || typeof numberOfPeople !== 'number') {
-      throw new Error('❌ Dữ liệu phòng không hợp lệ: thiếu roomType, price hoặc numberOfPeople');
-    }
-    console.log('📦 Dữ liệu gửi PayOS:', {
-      roomType: room.roomType,
-      roomPrice: room.price,
-      numberOfPeople,
-    });
 
     const paymentLinkData = await payOS.createPaymentLink(paymentData);
 
@@ -247,18 +236,136 @@ const createBookingService = async (userId, bookingData) => {
       message: 'Tạo booking thành công',
       data: {
         bookingId: createdBooking._id.toString(),
-        paymentLink: paymentLinkData.checkoutUrl,
-        expiresAt: paymentData.expiredAt
+        paymentLink: paymentLinkData.checkoutUrl
       }
     };
   } catch (err) {
     await session.abortTransaction();
-    console.error('❌ Lỗi trong createBookingService:', err);
+    console.error(' Lỗi trong createBookingService:', err);
     throw new Error(`Lỗi dịch vụ khi tạo booking: ${err.message}`);
   } finally {
     session.endSession();
   }
 };
+
+
+const processPaymentService = async (userId, bookingId, action) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    if (!mongoose.Types.ObjectId.isValid(bookingId)) {
+      throw new Error('ID đặt phòng không hợp lệ');
+    }
+
+    const booking = await bookingRepository.getBookingById(bookingId, session);
+    if (!booking || booking.userId.toString() !== userId) {
+      throw new Error('Đặt phòng không tồn tại hoặc không thuộc về người dùng');
+    }
+
+    if (action === 'confirm') {
+      const paymentStatus = await payOS.checkPaymentStatus({
+        orderCode: parseInt(booking.paymentInfo.bookingCode.replace('BOOK', ''))
+      });
+
+      if (paymentStatus.data.status === 'PAID') {
+        booking.status = 'confirmed';
+        booking.paymentInfo.payoutStatus = 'completed';
+
+        const payment = await bookingRepository.getPaymentByBookingId(bookingId, session);
+        payment.status = 'completed';
+        await payment.save({ session });
+        await booking.save({ session });
+
+      } else if (paymentStatus.data.status === 'CANCELLED' || paymentStatus.data.status === 'EXPIRED') {
+        booking.status = 'cancelled';
+        booking.paymentInfo.payoutStatus = 'failed';
+
+        // Trả lại phòng khi hủy booking do hết hạn hoặc hủy thanh toán
+        await bookingRepository.releaseRoomAvailability(
+          booking.roomId,
+          booking.details.checkInDate,
+          booking.details.checkOutDate,
+          booking.details.numberOfPeople,
+          session
+        );
+
+        await booking.save({ session });
+
+        throw new Error('Thanh toán đã bị hủy hoặc hết hạn');
+      } else {
+        throw new Error('Thanh toán đang xử lý hoặc thất bại');
+      }
+
+      await session.commitTransaction();
+
+      return {
+        success: true,
+        message: 'Xác nhận thanh toán thành công',
+        data: { status: booking.status }
+      };
+
+    } else if (action === 'retry') {
+      const room = await roomRepository.findAvailableRoom(
+        booking.roomId,
+        booking.details.checkInDate,
+        booking.details.checkOutDate,
+        booking.details.numberOfPeople,
+        session
+      );
+      if (!room) {
+        throw new Error('Phòng không còn khả dụng để thử lại thanh toán');
+      }
+
+      // Lấy tên khách sạn đúng cách
+      const hotel = await Hotel.findById(booking.hotelId).select('name').session(session);
+      const hotelName = hotel?.name || '';
+
+      const paymentData = {
+        orderCode: parseInt(booking.paymentInfo.bookingCode.replace('BOOK', '')) + 1,
+        amount: booking.totalPrice,
+        description: `Thanh toán lại đặt phòng ${booking.details.roomType} tại ${hotelName}`,
+        items: [{
+          name: booking.details.roomType,
+          quantity: booking.details.numberOfPeople,
+          price: booking.totalPrice / booking.details.numberOfPeople
+        }],
+        cancelUrl: process.env.CANCEL_URL ,
+        returnUrl: process.env.RETURN_URL ,
+        buyerName: booking.buyerName ,
+        buyerEmail: booking.buyerEmail ,
+        buyerPhone: booking.buyerPhone ,
+        buyerAddress: booking.buyerAddress ,
+        expiredAt: Math.floor(Date.now() / 1000) + 15 * 60
+      };
+
+      const paymentLinkData = await payOS.createPaymentLink(paymentData);
+
+      booking.paymentLink = paymentLinkData.checkoutUrl;
+      await booking.save({ session });
+
+      await session.commitTransaction();
+
+      return {
+        success: true,
+        message: 'Tạo lại link thanh toán thành công',
+        data: {
+          paymentLink: paymentLinkData.checkoutUrl,
+          expiresAt: paymentData.expiredAt
+        }
+      };
+
+    } else {
+      throw new Error('Hành động không hợp lệ, chỉ chấp nhận "confirm" hoặc "retry"');
+    }
+  } catch (error) {
+    await session.abortTransaction();
+    throw new Error(`Lỗi dịch vụ khi xử lý thanh toán: ${error.message}`);
+  } finally {
+    session.endSession();
+  }
+};
+
 module.exports = {
   getPendingBookingsService,
   getBookingsByOwnerHotelsService,

@@ -16,6 +16,9 @@ import Layout from "./pages/HotelOwner/Layout";
 import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
+import TravelWebsite from "./components/Tour/Tour"
+import TourPage from "./pages/Tour/TourPage";
+import TourDetail from "./pages/Tour/TourDetail";
 
 import Hero from "./components/Hero/Hero";
 import Account from "./pages/Account";
@@ -37,7 +40,10 @@ function App() {
 
             <Route path="/about" element={<About />} />
             <Route path="/destination" element={<Destination />} />
+            <Route path="/tourSearch" element={<TourPage />} />
+            <Route path="/tour/detail" element={<TourDetail />} />
 
+            <Route path="/tours" element={<TravelWebsite />} />
             <Route path="/register" element={<Register />} />
             <Route path="/owner" element={<Layout />}>
               <Route index element={<Dashboard />} />

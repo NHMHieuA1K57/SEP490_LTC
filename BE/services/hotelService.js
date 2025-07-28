@@ -143,23 +143,44 @@ const deleteHotelService = async (hotelId, ownerId) => {
   return { success: true, message: 'Xóa khách sạn thành công' };
 };
 
-const searchHotelsService = async (filters, page, limit) => {
-  try {
-    const result = await hotelRepository.searchHotelsHandler(filters, parseInt(page) || 1, parseInt(limit) || 10);
+const searchHotelsService = async (filters) => {
+  const results = await hotelRepository.searchHotelsBasic(filters);
+
+  if (!results.length) {
     return {
       success: true,
-      message: 'Tìm kiếm khách sạn thành công',
-      data: {
-        items: result.items,
-        total: result.total,
-        page: result.page,
-        totalPages: result.totalPages
-      }
+      message: 'Không tìm thấy khách sạn nào phù hợp với tiêu chí.',
+      data: []
     };
-  } catch (error) {
-    throw new Error(`Lỗi khi tìm kiếm khách sạn: ${error.message}`);
   }
+
+  const formattedResults = results.map(item => {
+    const hotel = item.hotel;
+    const rooms = item.rooms || [];
+
+    const priceFrom = rooms.reduce((min, room) => {
+      return room.price < min ? room.price : min;
+    }, rooms[0]?.price || 0);
+
+    return {
+      id: hotel._id,
+      name: hotel.name,
+      address: hotel.address,
+      image: hotel.images?.[0] || '',
+      rating: hotel.rating || 0,
+      reviewCount: hotel.reviewCount || 0,
+      priceFrom,
+      amenities: hotel.amenities || []
+    };
+  });
+
+  return {
+    success: true,
+    message: 'Tìm thấy khách sạn phù hợp',
+    data: formattedResults
+  };
 };
+
 
 module.exports = {
   createHotelService,
