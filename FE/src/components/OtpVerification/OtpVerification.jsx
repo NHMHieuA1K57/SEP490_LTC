@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./OtpVerification.scss";
-import axios from "axios";
-import { loginWithOtp, registerWithOtp } from "../../server/authAPI";
+import {
+  loginWithOtp,
+  registerWithOtp,
+  requestOtpLogin,
+  requestOtpRegister,
+} from "../../server/authAPI";
+import { useNavigate } from "react-router-dom";
 
 export default function OtpVerification({
   email,
@@ -15,6 +20,8 @@ export default function OtpVerification({
   const [success, setSuccess] = useState(false);
   const [showOtherOptions, setShowOtherOptions] = useState(false);
   const [timer, setTimer] = useState(60);
+  const [resending, setResending] = useState(false);
+  const navigate = useNavigate();
 
   const isLoginMode = mode === "login";
 
@@ -28,6 +35,25 @@ export default function OtpVerification({
       return () => clearInterval(interval);
     }
   }, [timer]);
+
+  // Auto call onSuccess when success becomes true
+  useEffect(() => {
+    if (success && typeof onSuccess === "function") {
+      console.log("Success state changed, calling onSuccess with:", { email });
+      onSuccess({ email });
+    }
+  }, [success, onSuccess, email]);
+
+  // Auto navigate when success becomes true
+  useEffect(() => {
+    if (success) {
+      console.log("Success state changed, navigating to home page");
+      // Delay navigation to show success message
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    }
+  }, [success, navigate]);
 
   const handleChange = (element, index) => {
     const newOtp = [...otp];
@@ -44,21 +70,73 @@ export default function OtpVerification({
     setError("");
     try {
       const otpCode = otp.join("");
+      console.log("Submitting OTP:", { email, otpCode, isLoginMode });
+
+      // Test mode: bypass actual API call for testing
+      if (process.env.NODE_ENV === "development" && otpCode === "123456") {
+        console.log("Test mode: using fixed OTP 123456");
+        const mockResponse = {
+          success: true,
+          message: "Đăng ký thành công!",
+          user: {
+            id: "test-user-id",
+            email: email,
+            name: "Test User",
+            role: "customer",
+          },
+          accessToken: "test-access-token",
+        };
+
+        setSuccess(true);
+        if (mockResponse.accessToken) {
+          localStorage.setItem("accessToken", mockResponse.accessToken);
+          console.log("AccessToken saved:", mockResponse.accessToken);
+        }
+        if (mockResponse.user) {
+          localStorage.setItem("user", JSON.stringify(mockResponse.user));
+          console.log("User saved:", mockResponse.user);
+        }
+        if (typeof onSuccess === "function") {
+          console.log("Calling onSuccess callback");
+          onSuccess(mockResponse.user || { email });
+        }
+        return;
+      }
+
       let res;
       if (isLoginMode) {
         res = await loginWithOtp(email, otpCode);
       } else {
-        res = await registerWithOtp(email, otpCode);
+        // For registration, pass empty name to avoid validation issues
+        res = await registerWithOtp(email, otpCode, "");
       }
+      console.log("OTP response:", res);
       if (res.success) {
         setSuccess(true);
+        // Lưu accessToken nếu có
+        if (res.accessToken) {
+          localStorage.setItem("accessToken", res.accessToken);
+          console.log("AccessToken saved:", res.accessToken);
+        }
+        // Lưu thông tin user
+        if (res.user) {
+          localStorage.setItem("user", JSON.stringify(res.user));
+          console.log("User saved:", res.user);
+        }
         if (typeof onSuccess === "function") {
+          console.log("Calling onSuccess callback");
           onSuccess(res.user || { email });
         }
       } else {
-        setError(res.message || "Xác thực OTP thất bại");
+        // Hiển thị lỗi chi tiết hơn
+        let errorMessage = res.message || "Xác thực OTP thất bại";
+        if (res.errors && res.errors.length > 0) {
+          errorMessage = res.errors.map((err) => err.msg).join(", ");
+        }
+        setError(errorMessage);
       }
     } catch (err) {
+      console.error("Error in handleSubmit:", err);
       setError(err.response?.data?.message || "Xác thực OTP thất bại");
     } finally {
       setSubmitting(false);
@@ -68,20 +146,63 @@ export default function OtpVerification({
   const handleResend = async () => {
     setError("");
     setOtp(["", "", "", "", "", ""]);
+    setResending(true);
     try {
-      await axios.post("http://localhost:9999/api/auth/request-otp", { email });
+      let res;
+      if (isLoginMode) {
+        res = await requestOtpLogin(email);
+      } else {
+        res = await requestOtpRegister(email);
+      }
+
+      if (res.success) {
+        setTimer(60);
+        setError("");
+      } else {
+        setError(res.message || "Không thể gửi lại email.");
+      }
     } catch (err) {
       setError("Không thể gửi lại email.");
+    } finally {
+      setResending(false);
     }
   };
 
   if (success) {
     return (
       <div className="otp-container">
-        <h3 className="otp-title">
-          {isLoginMode ? "Đăng nhập thành công!" : "Đăng ký thành công!"}
-        </h3>
-        <p>Bạn có thể sử dụng hệ thống.</p>
+        <div style={{ textAlign: "center", padding: "20px" }}>
+          <div
+            style={{
+              fontSize: "24px",
+              fontWeight: "bold",
+              color: "#4CAF50",
+              marginBottom: "10px",
+            }}
+          >
+            ✅ {isLoginMode ? "Đăng nhập thành công!" : "Đăng ký thành công!"}
+          </div>
+          <p style={{ color: "#666", marginBottom: "20px" }}>
+            Bạn có thể sử dụng hệ thống.
+          </p>
+          <button
+            onClick={() => {
+              // Navigate về trang chủ ngay lập tức
+              navigate("/");
+            }}
+            style={{
+              backgroundColor: "#1976d2",
+              color: "white",
+              border: "none",
+              padding: "12px 24px",
+              borderRadius: "4px",
+              cursor: "pointer",
+              fontSize: "16px",
+            }}
+          >
+            Về trang chủ
+          </button>
+        </div>
       </div>
     );
   }
@@ -114,6 +235,21 @@ export default function OtpVerification({
       <span className="otp-description">
         Nhập OTP được cung cấp trong thư điện tử gửi cho <b>{email}</b>.
       </span>
+      {process.env.NODE_ENV === "development" && (
+        <div
+          style={{
+            background: "#fff3cd",
+            border: "1px solid #ffeaa7",
+            padding: "8px",
+            margin: "8px 0",
+            borderRadius: "4px",
+            fontSize: "12px",
+            color: "#856404",
+          }}
+        >
+          🧪 Test Mode: Sử dụng OTP <strong>123456</strong> để test
+        </div>
+      )}
       <div className="otp-input-group">
         {otp.map((digit, index) => (
           <input
@@ -147,10 +283,13 @@ export default function OtpVerification({
           <span
             role="button"
             tabIndex={0}
-            style={{ color: "#1976d2", cursor: "pointer" }}
-            onClick={handleResend}
+            style={{
+              color: resending ? "#aaa" : "#1976d2",
+              cursor: resending ? "not-allowed" : "pointer",
+            }}
+            onClick={resending ? undefined : handleResend}
           >
-            Gửi lại email
+            {resending ? "Đang gửi..." : "Gửi lại email"}
           </span>
         </span>
       )}

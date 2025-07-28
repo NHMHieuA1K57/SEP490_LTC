@@ -230,13 +230,16 @@ const requestOtpRegister = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Vui lòng nhập email" });
     }
-    // Kiểm tra email đã tồn tại chưa
+
+    // Kiểm tra email đã tồn tại chưa - chỉ cho phép đăng ký nếu email chưa tồn tại
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email đã được sử dụng" });
+      return res.status(400).json({
+        success: false,
+        message: "Email đã được sử dụng. Vui lòng đăng nhập thay vì đăng ký.",
+      });
     }
+
     const expiryMinutes = 10;
     const { success, otp } = await sendOTPEmail(
       email,
@@ -252,10 +255,12 @@ const requestOtpRegister = async (req, res) => {
       });
     }
     saveOTP(email, otp, expiryMinutes);
+    console.log(`OTP sent for registration: ${otp} to ${email}`);
     return res
       .status(200)
       .json({ success: true, message: "OTP đã được gửi về email", otp });
   } catch (error) {
+    console.error("Error in requestOtpRegister:", error);
     return res
       .status(500)
       .json({ success: false, message: error.message || "Lỗi hệ thống" });
@@ -266,23 +271,40 @@ const requestOtpRegister = async (req, res) => {
 const registerWithOtp = async (req, res) => {
   try {
     const { email, otp, name } = req.body;
+    console.log("registerWithOtp called with:", { email, otp, name });
+
     if (!email || !otp) {
+      console.log("Missing email or OTP");
       return res
         .status(400)
         .json({ success: false, message: "Thiếu email hoặc otp" });
     }
+
     // Kiểm tra email đã tồn tại chưa
     const existingUser = await findUserByEmail(email);
     if (existingUser) {
+      console.log("Email already exists:", email);
       return res
         .status(400)
         .json({ success: false, message: "Email đã được sử dụng" });
     }
+
     // Xác thực OTP
+    console.log("Verifying OTP for email:", email);
     const { valid, reason } = verifyOTP(email, otp);
+    console.log("OTP verification result:", {
+      valid,
+      reason,
+      submittedOtp: otp,
+    });
+
     if (!valid) {
+      console.log("OTP verification failed:", reason);
       return res.status(400).json({ success: false, message: reason });
     }
+
+    console.log("OTP verified successfully, creating user...");
+
     // Tạo user không cần password
     const user = new (require("../models/User"))({
       email,
@@ -295,12 +317,31 @@ const registerWithOtp = async (req, res) => {
       profile: { updatedAt: new Date() },
     });
     await user.save();
-    return res.status(201).json({
+    console.log("User created successfully:", user._id);
+
+    // Tạo accessToken
+    const accessToken = jwt.sign(
+      { id: user._id, role: user.role, email: user.email },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN }
+    );
+
+    const response = {
       success: true,
       message: "Đăng ký thành công!",
-      userId: user._id,
-    });
+      user: {
+        id: user._id,
+        phone: user.phone,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+      accessToken,
+    };
+    console.log("registerWithOtp response:", response);
+    return res.status(201).json(response);
   } catch (error) {
+    console.error("Error in registerWithOtp:", error);
     return res
       .status(500)
       .json({ success: false, message: error.message || "Lỗi hệ thống" });

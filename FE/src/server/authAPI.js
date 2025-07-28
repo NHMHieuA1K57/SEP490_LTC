@@ -17,12 +17,24 @@ export async function requestOtpRegister(email) {
 // Xác thực OTP và tạo tài khoản
 export async function registerWithOtp(email, otp, name = "") {
   try {
+    console.log("Calling registerWithOtp with:", { email, otp, name });
+    const requestBody = { email, otp, name };
+    console.log("Request body:", requestBody);
+
     const res = await fetch("http://localhost:9999/api/auth/register-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, otp, name }),
+      body: JSON.stringify(requestBody),
     });
+
+    console.log("Response status:", res.status);
     const data = await res.json();
+    console.log("registerWithOtp response:", data);
+
+    if (!res.ok) {
+      console.error("HTTP Error:", res.status, data);
+    }
+
     return data;
   } catch (err) {
     console.error("Lỗi registerWithOtp:", err);
@@ -33,6 +45,7 @@ export async function registerWithOtp(email, otp, name = "") {
 // Gửi OTP về email để đăng nhập
 export async function requestOtpLogin(email) {
   try {
+    console.log("Calling requestOtpLogin with:", { email });
     const res = await fetch(
       "http://localhost:9999/api/auth/request-otp-login",
       {
@@ -42,6 +55,7 @@ export async function requestOtpLogin(email) {
       }
     );
     const data = await res.json();
+    console.log("requestOtpLogin response:", data);
     return data;
   } catch (err) {
     console.error("Lỗi requestOtpLogin:", err);
@@ -52,12 +66,14 @@ export async function requestOtpLogin(email) {
 // Xác thực OTP để đăng nhập
 export async function loginWithOtp(email, otp) {
   try {
+    console.log("Calling loginWithOtp with:", { email, otp });
     const res = await fetch("http://localhost:9999/api/auth/login-otp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, otp }),
     });
     const data = await res.json();
+    console.log("loginWithOtp response:", data);
     return data;
   } catch (err) {
     console.error("Lỗi loginWithOtp:", err);

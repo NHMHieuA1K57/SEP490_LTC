@@ -28,15 +28,26 @@ export default function RegisterBusinessUserForm({
     e.preventDefault();
     if (email) {
       setLoading(true);
+      setMessage("");
       let res;
-      if (isLoginMode) {
-        res = await requestOtpLogin(email);
-      } else {
-        res = await requestOtpRegister(email);
+      try {
+        if (isLoginMode) {
+          res = await requestOtpLogin(email);
+        } else {
+          res = await requestOtpRegister(email);
+        }
+
+        if (res.success) {
+          setShowOtp(true); // chuyển sang OTP component
+        } else {
+          setMessage(res.message || "Có lỗi xảy ra, vui lòng thử lại");
+        }
+      } catch (error) {
+        console.error("Error in handleEmailSubmit:", error);
+        setMessage("Có lỗi xảy ra, vui lòng thử lại");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-      setMessage(res.message);
-      if (res.success) setShowOtp(true); // chuyển sang OTP component
     }
   };
 
@@ -75,8 +86,10 @@ export default function RegisterBusinessUserForm({
         email={email}
         onBack={() => setShowOtp(false)}
         onSuccess={(user) => {
+          console.log("OtpVerification onSuccess called with:", user);
           localStorage.setItem("user", JSON.stringify(user));
           onSubmit && onSubmit(user);
+          console.log("Navigating to home page");
           navigate("/");
         }}
         mode={isLoginMode ? "login" : "signup"}
@@ -170,9 +183,13 @@ export default function RegisterBusinessUserForm({
         {message && (
           <div
             style={{
-              color: step === 2 ? "#007bff" : "red",
+              color:
+                message.includes("lỗi") || message.includes("thất bại")
+                  ? "red"
+                  : "#007bff",
               textAlign: "center",
               margin: "8px 0",
+              fontSize: "14px",
             }}
           >
             {message}
