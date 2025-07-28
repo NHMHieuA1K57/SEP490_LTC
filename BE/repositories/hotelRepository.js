@@ -330,7 +330,7 @@ const HotelRepository = {
     return matchedHotels;
   },
   getAllHotels: async () =>
-    await Hotel.find({ status: "active" })
+    await Hotel.find({})
       .populate({ path: "rooms", select: "price roomType maxPeople" })
       .select("name images address rating reviewCount amenities status")
       .lean(),
