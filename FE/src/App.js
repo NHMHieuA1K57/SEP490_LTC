@@ -1,4 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Tour from "./pages/Tour/Tour";
+import TourSearch from "./pages/Tour/TourPage";
+import TourDetail from "./pages/Tour/TourDetail";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import HomePage from "./pages/HomePage/HomePage";
@@ -29,6 +32,9 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/hotels" element={<HotelRooms />} />
             <Route path="/hotel/:id" element={<HotelDetail />} />
+            <Route path="/tours" element={<Tour />} />
+            <Route path="/tourSearch" element={<TourSearch />} />
+            <Route path="/tourDetail" element={<TourDetail />} />
             <Route path="/bookings" element={<MyBookings />} />
             <Route path="/login" element={<Login />} />
             <Route path="/payment" element={<Payment />} />
