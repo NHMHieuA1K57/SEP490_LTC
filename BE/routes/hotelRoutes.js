@@ -61,7 +61,7 @@ router.post(
 router.get(
   "/:hotelId/room",
   authMiddleware,
-  roleMiddleware(["hotel_owner"]),
+  roleMiddleware(["hotel_owner", "customer"]),
   roomController.getRooms
 );
 router.patch(

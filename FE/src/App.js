@@ -34,7 +34,7 @@ function App() {
             <Route path="/hotel/:id" element={<HotelDetail />} />
             <Route path="/tours" element={<Tour />} />
             <Route path="/tourSearch" element={<TourSearch />} />
-            <Route path="/tourDetail" element={<TourDetail />} />
+            <Route path="/tourDetail/:id" element={<TourDetail />} />
             <Route path="/bookings" element={<MyBookings />} />
             <Route path="/login" element={<Login />} />
             <Route path="/payment" element={<Payment />} />

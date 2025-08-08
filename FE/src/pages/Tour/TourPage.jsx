@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./TourPage.scss";
 
 const TourPage = () => {
   const [selectedSort, setSelectedSort] = useState("Ưu đãi tốt nhất");
+  const navigate = useNavigate();
 
   const tours = Array(5)
     .fill({
@@ -43,8 +45,7 @@ const TourPage = () => {
   ];
 
   const handleTourClick = (tourId) => {
-    console.log(`Xem tour ${tourId}`);
-    // Có thể navigate đến trang chi tiết tour
+    navigate(`/tourDetail/${tourId}`);
   };
 
   const handleSearch = () => {
@@ -138,7 +139,12 @@ const TourPage = () => {
             {/* Tour Cards */}
             <div className="tour-list">
               {tours.map((tour) => (
-                <div key={tour.id} className="tour-card">
+                <div
+                  key={tour.id}
+                  className="tour-card"
+                  onClick={() => handleTourClick(tour.id)}
+                  style={{ cursor: "pointer" }}
+                >
                   <div className="tour-image">
                     <img
                       src="/placeholder.svg?height=200&width=320"
@@ -168,7 +174,10 @@ const TourPage = () => {
                       </div>
                       <button
                         className="book-btn"
-                        onClick={() => handleTourClick(tour.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleTourClick(tour.id);
+                        }}
                       >
                         Xem Tour
                       </button>

@@ -37,3 +37,5 @@ export async function fetchHotelById(hotelId) {
     return null;
   }
 }
+
+// Lấy chi tiết 1 khách sạn theo ID và tất cả phòng của khách sạn đó
