@@ -1,24 +1,31 @@
-// Gọi API cập nhật thông tin user (ví dụ: tên, địa chỉ, ...)
-export async function updateProfile({
-  name,
-  phone,
-  address,
-  dateOfBirth,
-  avatar,
-}) {
+export const updateProfile = async (payload) => {
+  try {
+    const token = localStorage.getItem("accessToken"); // Lấy token từ localStorage
+    const res = await fetch("http://localhost:9999/api/auth/update-profile", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // Gửi kèm token
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    return data; // { success: true, data: {...} }
+  } catch (error) {
+    console.error("Lỗi updateProfile:", error);
+    return { success: false, error: error.message };
+  }
+};
+
+// Lấy profile người dùng đang đăng nhập
+export async function fetchProfile() {
   const token = localStorage.getItem("accessToken");
-  const form = new FormData();
-  if (name) form.append("name", name);
-  if (phone) form.append("phone", phone);
-  if (address) form.append("address", address);
-  if (dateOfBirth) form.append("dateOfBirth", dateOfBirth);
-  if (avatar) form.append("avatar", avatar);
-  const res = await fetch("http://localhost:9999/api/auth/update-profile", {
-    method: "PUT",
+  const res = await fetch("http://localhost:9999/api/auth/profile", {
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    body: form,
   });
   return await res.json();
 }

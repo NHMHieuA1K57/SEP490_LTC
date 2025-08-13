@@ -41,14 +41,13 @@ router.post(
 router.get(
   "/profile",
   authMiddleware,
-  roleMiddleware(["customer", "hotel_owner", "tour_provider"]),
+  roleMiddleware("customer", "hotel_owner", "tour_provider"),
   authController.getProfile
 );
 router.put(
   "/update-profile",
   authMiddleware,
-  roleMiddleware(["customer", "hotel_owner", "tour_provider"]),
-  upload.single("avatar"),
+  roleMiddleware("customer", "hotel_owner", "tour_provider"),
   authController.updateProfile
 );
 

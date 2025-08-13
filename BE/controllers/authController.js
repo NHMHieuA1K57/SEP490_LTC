@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const { sendOTPEmail } = require("../services/otpMailService");
 const { saveOTP, verifyOTP } = require("../utils/otpCache");
+const mongoose = require("mongoose");
+const { isValidObjectId } = mongoose;
 
 const register = async (req, res) => {
   try {
