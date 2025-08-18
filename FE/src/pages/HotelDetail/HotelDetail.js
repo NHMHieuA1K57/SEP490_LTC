@@ -18,7 +18,7 @@ const HotelDetail = () => {
       id: 1,
       title: "Giá thấp nhất!",
       originalPrice: 525195,
-      discountedPrice: 175195,
+      discountedPrice: 50,
       discount: 67,
       capacity: "Đã áp dụng 21.329",
       amenities: ["Chính sách hủy", "Đặt và trả tiền ngay", "WiFi miễn phí"],
@@ -92,18 +92,30 @@ const HotelDetail = () => {
   }, [id, location.state]);
 
   // Kiểm tra đăng nhập qua localStorage (ví dụ lưu accessToken)
-  const handleBookNow = () => {
+  const handleBookNow = (option) => {
     const accessToken = localStorage.getItem("accessToken");
-    // Kiểm tra token không phải null, không phải chuỗi rỗng, không phải 'undefined'
+
+    const bookingData = {
+      hotel: name,
+      room: "Nhà trệt (Bungalow)", // hoặc hotel.rooms[0].name nếu có dữ liệu
+      roomPrice: option.discountedPrice,
+      nights: 1, // có thể cho user chọn, tạm thời fix
+      checkIn: "2025-09-18",
+      checkOut: "2025-09-19",
+      guests: 2,
+
+      total: option.discountedPrice * 1,
+    };
+
     if (
       !accessToken ||
       accessToken === "undefined" ||
       accessToken === "null" ||
       accessToken.trim() === ""
     ) {
-      navigate("/payment", { state: { redirectTo: "/payment" } });
+      navigate("/payment", { state: { booking: bookingData } });
     } else {
-      navigate("/payment");
+      navigate("/payment", { state: { booking: bookingData } });
     }
   };
 
@@ -359,7 +371,7 @@ const HotelDetail = () => {
                           <div className="room-booking__actions">
                             <button
                               className="room-booking__book-now"
-                              onClick={handleBookNow}
+                              onClick={() => handleBookNow(option)}
                             >
                               Đặt ngay
                             </button>
