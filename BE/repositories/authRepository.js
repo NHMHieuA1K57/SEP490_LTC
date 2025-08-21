@@ -1,14 +1,16 @@
-const User = require('../models/User');
-const LoyaltyPoints = require('../models/LoyaltyPoints');
+const User = require("../models/User");
+const LoyaltyPoints = require("../models/LoyaltyPoints");
+const mongoose = require("mongoose");
 
 const findUserById = async (userId) => {
-  if (!isValidObjectId(userId)) throw new Error('Invalid user ID');
-  return await User.findById(userId).select('email phone name profile role status isEmailVerified businessInfo');
+  if (!mongoose.isValidObjectId(userId)) throw new Error("Invalid user ID");
+  return await User.findById(userId).select(
+    "email phone name profile role status isEmailVerified businessInfo"
+  );
 };
 
-
 const findLoyaltyPointsByUserId = async (userId) => {
-  return await LoyaltyPoints.findOne({ userId }).select('points history');
+  return await LoyaltyPoints.findOne({ userId }).select("points history");
 };
 
 const updateUserProfile = async (userId, updates) => {
@@ -17,9 +19,9 @@ const updateUserProfile = async (userId, updates) => {
       userId,
       { $set: updates },
       { new: true, runValidators: true }
-    ).select('email phone name profile businessInfo');
+    ).select("email phone name profile businessInfo");
   } catch (error) {
-    console.error('Error updating user profile:', error);
+    console.error("Error updating user profile:", error);
     throw error;
   }
 };
@@ -30,10 +32,14 @@ const findUserByEmail = async (email) => {
 
 const findPendingBusinessUsers = async () => {
   return await User.find({
-    role: { $in: ['hotel_owner', 'tour_provider'] },
-    status: 'pending',
-    'businessInfo.isVerified': false
-  }).select('email name role businessInfo.taxId businessInfo.businessLicenseImage businessInfo.website createdAt').lean();
+    role: { $in: ["hotel_owner", "tour_provider"] },
+    status: "pending",
+    "businessInfo.isVerified": false,
+  })
+    .select(
+      "email name role businessInfo.taxId businessInfo.businessLicenseImage businessInfo.website createdAt"
+    )
+    .lean();
 };
 
 const createUser = async (userData) => {
@@ -41,7 +47,7 @@ const createUser = async (userData) => {
     const user = new User(userData);
     return await user.save();
   } catch (error) {
-    console.error('Error creating user:', error);
+    console.error("Error creating user:", error);
     throw error;
   }
 };
@@ -50,7 +56,7 @@ const updateUser = async (user) => {
   try {
     return await User.findByIdAndUpdate(user._id, user, { new: true });
   } catch (error) {
-    console.error('Error updating user:', error);
+    console.error("Error updating user:", error);
     throw error;
   }
 };
@@ -63,8 +69,17 @@ const updatePassword = async (userId, hashedPassword) => {
       { new: true }
     );
   } catch (error) {
-    console.error('Error updating password:', error);
+    console.error("Error updating password:", error);
     throw error;
+  }
+};
+
+const checkUserRole = (userRole, allowedRoles) => {
+  const allowed = Array.isArray(allowedRoles[0])
+    ? allowedRoles[0]
+    : allowedRoles;
+  if (!allowed.includes(userRole)) {
+    throw new Error("User does not have the required role");
   }
 };
 
@@ -76,5 +91,6 @@ module.exports = {
   findPendingBusinessUsers,
   createUser,
   updateUser,
-  updatePassword
+  updatePassword,
+  checkUserRole,
 };

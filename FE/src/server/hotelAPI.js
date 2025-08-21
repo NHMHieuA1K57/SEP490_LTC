@@ -1,10 +1,23 @@
 // Lấy danh sách tất cả khách sạn từ backend
 export async function fetchAllHotels() {
   try {
+    console.log("Fetching all hotels...");
     const res = await fetch("http://localhost:9999/api/hotel/all");
-    if (!res.ok) throw new Error("Lỗi khi fetch khách sạn");
+
+    if (!res.ok) {
+      console.error("HTTP Error:", res.status, res.statusText);
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+
     const data = await res.json();
-    return data.data || [];
+    console.log("Hotels response:", data);
+
+    if (data.success) {
+      return data.data || [];
+    } else {
+      console.error("API Error:", data.message);
+      throw new Error(data.message || "Lỗi khi fetch khách sạn");
+    }
   } catch (err) {
     console.error("Lỗi fetchAllHotels:", err);
     return [];
@@ -24,3 +37,5 @@ export async function fetchHotelById(hotelId) {
     return null;
   }
 }
+
+// Lấy chi tiết 1 khách sạn theo ID và tất cả phòng của khách sạn đó

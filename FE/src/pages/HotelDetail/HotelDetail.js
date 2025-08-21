@@ -7,6 +7,58 @@ import "./HotelDetail.scss";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 
 const HotelDetail = () => {
+  const [quantities, setQuantities] = useState({
+    1: 1,
+    2: 1,
+    3: 1,
+  });
+
+  const roomOptions = [
+    {
+      id: 1,
+      title: "Giá thấp nhất!",
+      originalPrice: 525195,
+      discountedPrice: 200.0,
+      discount: 67,
+      capacity: "Đã áp dụng 21.329",
+      amenities: ["Chính sách hủy", "Đặt và trả tiền ngay", "WiFi miễn phí"],
+      isLowestPrice: true,
+    },
+    {
+      id: 2,
+      title: "",
+      originalPrice: 525195,
+      discountedPrice: 276605,
+      discount: 47,
+      capacity: "Đã áp dụng 6.330",
+      amenities: ["Chính sách hủy", "Đặt và trả tiền ngay", "WiFi miễn phí"],
+      hasTimeLimit: true,
+    },
+    {
+      id: 3,
+      title: "",
+      originalPrice: 414906,
+      discountedPrice: 103727,
+      discount: 75,
+      capacity: "Đã áp dụng 2.374",
+      amenities: ["Chính sách hủy", "Đặt và trả tiền ngay", "WiFi miễn phí"],
+      isLastMinute: true,
+      hasPromotion: true,
+      promotionText: "Hiếm! Giá hấp dẫn của chúng tôi trong tháng trước",
+      hasCapacityWarning: true,
+    },
+  ];
+
+  const handleQuantityChange = (roomId, quantity) => {
+    setQuantities((prev) => ({
+      ...prev,
+      [roomId]: quantity,
+    }));
+  };
+
+  const formatPrice = (price) => {
+    return price.toLocaleString("vi-VN");
+  };
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,8 +91,32 @@ const HotelDetail = () => {
     // eslint-disable-next-line
   }, [id, location.state]);
 
-  const handleBookNow = () => {
-    navigate("/payment");
+  // Kiểm tra đăng nhập qua localStorage (ví dụ lưu accessToken)
+  const handleBookNow = (option) => {
+    const accessToken = localStorage.getItem("accessToken");
+
+    const bookingData = {
+      hotel: name,
+      room: "Nhà trệt (Bungalow)", // hoặc hotel.rooms[0].name nếu có dữ liệu
+      roomPrice: option.discountedPrice,
+      nights: 1, // có thể cho user chọn, tạm thời fix
+      checkIn: "2025-09-18",
+      checkOut: "2025-09-19",
+      guests: 2,
+
+      total: option.discountedPrice * 1,
+    };
+
+    if (
+      !accessToken ||
+      accessToken === "undefined" ||
+      accessToken === "null" ||
+      accessToken.trim() === ""
+    ) {
+      navigate("/payment", { state: { booking: bookingData } });
+    } else {
+      navigate("/payment", { state: { booking: bookingData } });
+    }
   };
 
   if (loading)
@@ -152,40 +228,175 @@ const HotelDetail = () => {
               </div>
             </div>
 
-            <div className="booking-card card">
-              <div className="price">
-                <span className="amount">
-                  {price ? price.toLocaleString("vi-VN") + " VND" : "Liên hệ"}
-                </span>
-                <span className="period">/ngày</span>
+            <div className="room-booking">
+              <header className="room-booking__header">
+                <h1>Chọn phòng</h1>
+                <div className="room-booking__login">
+                  <span>👤 Chúng tôi khớp giá!</span>
+                </div>
+              </header>
+
+              <div className="room-booking__subtitle">
+                <p>
+                  Hiện có <strong>1 loại phòng</strong> với{" "}
+                  <span className="highlight">
+                    chỉ còn tổng cộng 3 lựa chọn
+                  </span>
+                </p>
+                <p className="room-booking__note">
+                  🏷️ Giá không bao gồm thuế & phí
+                </p>
               </div>
 
-              <div className="booking-form">
-                <div className="date-inputs">
-                  <div className="input-group">
-                    <label>Nhận phòng</label>
-                    <input type="date" />
-                  </div>
-                  <div className="input-group">
-                    <label>Trả phòng</label>
-                    <input type="date" />
+              {/* Wrapper to match hotel-gallery-new width */}
+              <div className="room-booking__content-wide">
+                <div className="room-booking__sidebar">
+                  <h2>Nhà trệt (Bungalow)</h2>
+
+                  <div className="room-booking__room-type">
+                    <h3>Loại phòng</h3>
+                    <div className="room-booking__room-image">
+                      <img
+                        src="/placeholder.svg?height=150&width=200&text=Bunk+Bed+Room"
+                        alt="Room with bunk beds"
+                      />
+                      <button className="room-booking__view-details">
+                        Xem ảnh và chi tiết
+                      </button>
+                    </div>
+
+                    <div className="room-booking__room-info">
+                      <div className="room-booking__bed-info">
+                        <span>🛏️ 1 giường lớn & 6 giường tầng</span>
+                      </div>
+                      <div className="room-booking__size-info">
+                        <span>🏠 Diện tích phòng: 15 m²</span>
+                      </div>
+                      <button className="room-booking__amenities-btn">
+                        ➕ Các tiện ích khác
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="input-group">
-                  <label>Số khách</label>
-                  <select>
-                    <option>1 khách</option>
-                    <option>2 khách</option>
-                    <option>3 khách</option>
-                    <option>4 khách</option>
-                  </select>
+
+                <div className="room-booking__options">
+                  {roomOptions.map((option) => (
+                    <div key={option.id} className="room-booking__option">
+                      {option.isLowestPrice && (
+                        <div className="room-booking__option-header">
+                          <span className="room-booking__best-price">
+                            {option.title}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="room-booking__option-content">
+                        <div className="room-booking__amenities">
+                          {option.amenities.map((amenity, index) => (
+                            <div key={index} className="room-booking__amenity">
+                              <span className="checkmark">✓</span>
+                              <span>{amenity}</span>
+                              {index === 0 && (
+                                <span className="room-booking__info-icon">
+                                  ℹ️
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="room-booking__capacity">
+                          <div className="room-booking__guest-icons">
+                            <span className="guest-icon">👥</span>
+                            <span className="guest-count">2</span>
+                            {option.hasCapacityWarning && (
+                              <div className="room-booking__warning-badge">
+                                <span>⚠️</span>
+                              </div>
+                            )}
+                          </div>
+                          {option.hasCapacityWarning && (
+                            <div className="room-booking__capacity-warning">
+                              <span>Vượt quá sức chứa phòng</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="room-booking__pricing">
+                          <div className="room-booking__promotion-badge">
+                            <span className="green-badge">
+                              🟢 {option.capacity} ₫
+                            </span>
+                            <span className="red-badge">1</span>
+                          </div>
+
+                          {option.hasPromotion && (
+                            <div className="room-booking__promotion-text">
+                              <span className="promotion-warning">Hiếm 🛡️</span>
+                              <div className="promotion-desc">
+                                {option.promotionText}
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="room-booking__price-info">
+                            <div className="room-booking__original-price">
+                              {formatPrice(option.originalPrice)} ₫ -
+                              {option.discount}%
+                            </div>
+                            <div className="room-booking__discounted-price">
+                              {formatPrice(option.discountedPrice)} ₫
+                            </div>
+                            <div className="room-booking__price-note">
+                              Giá mỗi đêm chưa gồm thuế và phí
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="room-booking__booking-section">
+                          <div className="room-booking__quantity-section">
+                            <div className="room-booking__quantity-display">
+                              <span className="quantity-number">
+                                {quantities[option.id]}
+                              </span>
+                            </div>
+                            {option.hasCapacityWarning && (
+                              <div className="room-booking__capacity-excess">
+                                <span>vượt quá 1 khách</span>
+                                <span className="excess-badge">1</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="room-booking__actions">
+                            <button
+                              className="room-booking__book-now"
+                              onClick={() => handleBookNow(option)}
+                            >
+                              Đặt ngay
+                            </button>
+
+                            {(option.hasTimeLimit || option.isLastMinute) && (
+                              <div className="room-booking__time-limit">
+                                <span>Đặt trong 2 phút</span>
+                              </div>
+                            )}
+
+                            <div className="room-booking__final-promotion">
+                              <span>Phòng cuối cùng của chúng tôi!</span>
+                            </div>
+
+                            {option.hasCapacityWarning && (
+                              <div className="room-booking__capacity-warning-final">
+                                <span>Vượt quá sức chứa phòng</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <button
-                  onClick={handleBookNow}
-                  className="btn btn-primary btn-full"
-                >
-                  Đặt ngay
-                </button>
               </div>
             </div>
           </div>

@@ -1,22 +1,42 @@
 import React, { useEffect, useState } from "react";
 import "./Account.scss";
+import { updateProfile, fetchProfile } from "../server/accountAPI";
 
 const getInitial = (email) => (email ? email[0].toUpperCase() : "U");
 
 const Account = () => {
   const [user, setUser] = useState(null);
 
+  // Lấy thông tin user từ API khi load trang
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      setUser(null);
-    }
+    const getProfile = async () => {
+      // 1. Lấy dữ liệu từ localStorage trước
+      const localUser = localStorage.getItem("user");
+      if (localUser) {
+        try {
+          setUser(JSON.parse(localUser));
+        } catch (error) {
+          console.error("Lỗi parse localStorage:", error);
+        }
+      }
+
+      // 2. Sau đó vẫn gọi API để lấy dữ liệu mới nhất (nếu cần)
+      const profile = await fetchProfile();
+      if (profile && profile.success && profile.data) {
+        setUser(profile.data);
+        localStorage.setItem("user", JSON.stringify(profile.data));
+      }
+    };
+    getProfile();
   }, []);
+
   const email = user?.email || "";
 
-  const name = "abc";
+  const [editingName, setEditingName] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const name = user?.name || "abc";
+
   return (
     <div className="account-page">
       <div className="account-container">
@@ -34,14 +54,78 @@ const Account = () => {
         <div className="account-main">
           <h2>Thông tin người dùng</h2>
           <section className="account-info-row account-info-avatar-row">
-            <div className="account-avatar-icon">{getInitial(email)}</div>
-            <div className="account-info-avatar-content">
-              <div className="account-info-label account-info-label-inline">
-                Họ & Tên
-              </div>
-              <div className="account-info-name">{name}</div>
-            </div>
-            <span className="edit-name-btn">Chỉnh sửa</span>
+            {!editingName ? (
+              <>
+                <div className="account-avatar-icon">{getInitial(email)}</div>
+                <div className="account-info-avatar-content">
+                  <div className="account-info-label account-info-label-inline">
+                    Họ & Tên
+                  </div>
+                  <div className="account-info-name">{name}</div>
+                </div>
+                <span
+                  className="edit-name-btn"
+                  onClick={() => {
+                    // Nếu user có name, tách thành họ và tên
+                    const parts = name.split(" ");
+                    setLastName(parts[0] || "");
+                    setFirstName(parts.slice(1).join(" ") || "");
+                    setEditingName(true);
+                  }}
+                >
+                  Chỉnh sửa
+                </span>
+              </>
+            ) : (
+              <form
+                className="edit-name-form"
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const fullName = `${lastName} ${firstName}`.trim();
+
+                  const result = await updateProfile({ name: fullName });
+                  console.log("Kết quả updateProfile:", result); // Debug
+                  console.log("Kết quả API:", result);
+
+                  if (result && result.success) {
+                    // Lấy lại profile mới nhất
+                    const profile = await fetchProfile();
+                    if (profile && profile.success && profile.data) {
+                      localStorage.setItem(
+                        "user",
+                        JSON.stringify(profile.data)
+                      );
+                      setUser(profile.data);
+                    }
+                  } else {
+                    alert(result?.error || "Cập nhật thất bại");
+                  }
+
+                  setEditingName(false);
+                }}
+              >
+                <label htmlFor="lastName">Họ</label>
+                <input
+                  id="lastName"
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                />
+                <label htmlFor="firstName">Tên</label>
+                <input
+                  id="firstName"
+                  type="text"
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                />
+                <div className="edit-name-form-actions">
+                  <button type="button" onClick={() => setEditingName(false)}>
+                    Hủy
+                  </button>
+                  <button type="submit">Lưu</button>
+                </div>
+              </form>
+            )}
           </section>
           <section className="account-info-row account-info-row-email">
             <div className="account-info-label account-info-label-inline">
@@ -60,8 +144,12 @@ const Account = () => {
               Số điện thoại
             </div>
             <div className="account-info-phone-content">
-              <div className="account-info-phone-value"></div>
-              <span className="edit-phone-btn">Thêm</span>
+              <div className="account-info-phone-value">
+                {user?.phone || "Chưa cập nhật"}
+              </div>
+              <span className="edit-phone-btn">
+                {user?.phone ? "Chỉnh sửa" : "Thêm"}
+              </span>
             </div>
           </section>
           <section className="account-info-row account-info-row-password">

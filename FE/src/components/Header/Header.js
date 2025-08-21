@@ -26,7 +26,11 @@ const Header = () => {
     <header className="header">
       <div className="header-content">
         <Link to="/" className="logo">
-          <span className="logo-icon"><><image src="../../assets/HeaderIC.jpg" alt="Logo" /></></span>
+          <span className="logo-icon">
+            <>
+              <image src="../../assets/HeaderIC.jpg" alt="Logo" />
+            </>
+          </span>
           <span className="logo-text">LTC</span>
         </Link>
 
@@ -42,7 +46,7 @@ const Header = () => {
           <Link
             to="/tours"
             className={`nav-link ${
-              location.pathname === "/tours" ? "active" : ""
+              location.pathname.startsWith("/tours") ? "active" : ""
             }`}
           >
             Tour

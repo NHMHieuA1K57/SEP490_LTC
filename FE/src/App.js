@@ -1,4 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Tour from "./pages/Tour/Tour";
+import TourSearch from "./pages/Tour/TourPage";
+import TourDetail from "./pages/Tour/TourDetail";
 import Header from "./components/Header/Header";
 import Footer from "./components/Footer/Footer";
 import HomePage from "./pages/HomePage/HomePage";
@@ -16,12 +19,9 @@ import Layout from "./pages/HotelOwner/Layout";
 import Dashboard from "./pages/HotelOwner/Dashboard";
 import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
-// import TravelWebsite from "./components/Tour/Tour"
-// import TourPage from "./pages/Tour/TourPage";
-// import TourDetail from "./pages/Tour/TourDetail";
-
 import Hero from "./components/Hero/Hero";
 import Account from "./pages/Account";
+import QR from "./pages/Payment/QRPage";
 
 function App() {
   return (
@@ -33,6 +33,9 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/hotels" element={<HotelRooms />} />
             <Route path="/hotel/:id" element={<HotelDetail />} />
+            <Route path="/tours" element={<Tour />} />
+            <Route path="/tourSearch" element={<TourSearch />} />
+            <Route path="/tourDetail/:id" element={<TourDetail />} />
             <Route path="/bookings" element={<MyBookings />} />
             <Route path="/login" element={<Login />} />
             <Route path="/payment" element={<Payment />} />
@@ -40,16 +43,14 @@ function App() {
 
             <Route path="/about" element={<About />} />
             <Route path="/destination" element={<Destination />} />
-            {/* <Route path="/tourSearch" element={<TourPage />} />
-            <Route path="/tour/detail" element={<TourDetail />} />
 
-            <Route path="/tours" element={<TravelWebsite />} /> */}
             <Route path="/register" element={<Register />} />
             <Route path="/owner" element={<Layout />}>
               <Route index element={<Dashboard />} />
               <Route path="add-room" element={<AddRoom />} />
               <Route path="list-rooms" element={<ListRoom />} />
             </Route>
+            <Route path="/qr" element={<QR />} />
           </Routes>
         </main>
         <Footer />
