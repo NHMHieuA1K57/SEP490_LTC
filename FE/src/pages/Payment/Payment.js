@@ -9,45 +9,29 @@ const Payment = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
-
   const booking = location.state?.booking;
 
   if (!booking) {
     return <div>Không có dữ liệu đặt phòng.</div>;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
-    alert("Payment successful!");
-    navigate("/bookings");
-  };
-
-  const handleAlternativePayment = () => {
-    alert("Payment successful!");
-    navigate("/bookings");
-  };
-
-  const bookings = {
-    hotel: "The Grand Resort",
-    room: "Deluxe King Room",
-    checkIn: "Sep 23, 2025",
-    checkOut: "Sep 26, 2025",
-    guests: 2,
-    nights: 3,
-    roomPrice: 100,
-    taxes: 36,
-    total: 336,
+    navigate("/qr", { state: { booking } });
   };
 
   return (
     <div className="payment-page">
       <div className="container">
         <div className="page-header">
-          <h1>Payment</h1>
-          <p>Complete your booking by providing payment details</p>
+          <h1>Thanh toán</h1>
+          <p>Hoàn tất đặt phòng của bạn bằng cách điền thông tin thanh toán</p>
         </div>
 
         <div className="payment-container">
@@ -55,13 +39,13 @@ const Payment = () => {
             {paymentMethod === "credit" && (
               <form className="credit-card-form" onSubmit={handleSubmit}>
                 <div className="form-group">
-                  <label htmlFor="fullName">Full Name</label>
+                  <label htmlFor="fullName">Họ và tên</label>
                   <input
                     type="text"
                     id="fullName"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="John Doe"
+                    placeholder="Nguyễn Văn A"
                     required
                   />
                 </div>
@@ -79,7 +63,7 @@ const Payment = () => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="phone">Phone Number</label>
+                  <label htmlFor="phone">Số điện thoại</label>
                   <input
                     type="tel"
                     id="phone"
@@ -90,15 +74,21 @@ const Payment = () => {
                   />
                 </div>
 
-                <button type="submit" className="btn btn-primary pay-btn">
-                  Pay ${booking.total}
+                <button
+                  type="submit"
+                  className="btn btn-primary pay-btn"
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Đang xử lý..."
+                    : `Thanh toán ${booking.total} VND`}
                 </button>
               </form>
             )}
           </div>
 
           <div className="booking-summary">
-            <h3>Booking Summary</h3>
+            <h3>Thông tin đặt phòng</h3>
             <div className="hotel-info">
               <div className="hotel-info__image">
                 <img
@@ -114,19 +104,19 @@ const Payment = () => {
 
             <div className="booking-details">
               <div className="detail-row">
-                <span>Check-in</span>
+                <span>Ngày nhận phòng</span>
                 <span>{booking.checkIn}</span>
               </div>
               <div className="detail-row">
-                <span>Check-out</span>
+                <span>Ngày trả phòng</span>
                 <span>{booking.checkOut}</span>
               </div>
               <div className="detail-row">
-                <span>Guests</span>
+                <span>Số khách</span>
                 <span>{booking.guests}</span>
               </div>
               <div className="detail-row">
-                <span>Room</span>
+                <span>Loại phòng</span>
                 <span>{booking.room}</span>
               </div>
             </div>
@@ -134,22 +124,22 @@ const Payment = () => {
             <div className="price-details">
               <div className="price-row">
                 <span>
-                  ${booking.roomPrice} x {booking.nights} nights
+                  {booking.roomPrice} VND x {booking.nights} đêm
                 </span>
-                <span>${booking.roomPrice * booking.nights}</span>
+                <span>{booking.roomPrice * booking.nights} VND</span>
               </div>
 
               <div className="price-row price-row--total">
-                <span>Total</span>
-                <span>${booking.total}</span>
+                <span>Tổng cộng</span>
+                <span>{booking.total} VND</span>
               </div>
             </div>
 
             <div className="cancellation-policy">
-              <h4>Cancellation Policy</h4>
+              <h4>Chính sách hủy phòng</h4>
               <p>
-                Free cancellation until September 20, 2025. After that, you will
-                be charged the full amount.
+                Miễn phí hủy phòng đến ngày 20/09/2025. Sau thời gian này bạn sẽ
+                bị tính toàn bộ chi phí đặt phòng.
               </p>
             </div>
           </div>

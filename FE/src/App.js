@@ -21,6 +21,7 @@ import AddRoom from "./pages/HotelOwner/AddRoom";
 import ListRoom from "./pages/HotelOwner/ListRoom";
 import Hero from "./components/Hero/Hero";
 import Account from "./pages/Account";
+import QR from "./pages/Payment/QRPage";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
               <Route path="add-room" element={<AddRoom />} />
               <Route path="list-rooms" element={<ListRoom />} />
             </Route>
+            <Route path="/qr" element={<QR />} />
           </Routes>
         </main>
         <Footer />

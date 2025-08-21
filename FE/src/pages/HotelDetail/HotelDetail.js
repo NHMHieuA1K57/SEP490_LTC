@@ -18,7 +18,7 @@ const HotelDetail = () => {
       id: 1,
       title: "Giá thấp nhất!",
       originalPrice: 525195,
-      discountedPrice: 50,
+      discountedPrice: 200.0,
       discount: 67,
       capacity: "Đã áp dụng 21.329",
       amenities: ["Chính sách hủy", "Đặt và trả tiền ngay", "WiFi miễn phí"],

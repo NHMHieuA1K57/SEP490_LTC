@@ -1,0 +1,34 @@
+.qr-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  gap: 20px;
+}
+
+.qr-page img {
+  width: 350px;
+  height: 350px;
+  border: 3px solid #444;
+  border-radius: 12px;
+  padding: 15px;
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.paid-button {
+  padding: 12px 24px;
+  background-color: #4caf50;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.paid-button:hover {
+  background-color: #45a049;
+}
