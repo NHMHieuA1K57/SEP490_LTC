@@ -1,15 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const tourController = require('../controllers/tourController');
-const bookingTourController = require("../controllers/bookingTourController");
-const { authMiddleware } = require("../middleware/authMiddleware");
+const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
 
-router.post("/tour-bookings", authMiddleware, bookingTourController.bookTour);
-
-router.post('/', tourController.createTour);
+// public
 router.get('/', tourController.getAllTours);
+router.get('/search', tourController.searchTours);
 router.get('/:id', tourController.getTourById);
-router.put('/:id', tourController.updateTour);
-router.delete('/:id', tourController.deleteTour);
+
+// protected
+router.post('/',
+  authMiddleware,
+  roleMiddleware(['tour_provider', 'admin']),
+  tourController.createTour
+);
+
+router.put('/:id',
+  authMiddleware,
+  roleMiddleware(['tour_provider', 'admin']),
+  tourController.updateTour
+);
+
+router.delete('/:id',
+  authMiddleware,
+  roleMiddleware(['tour_provider', 'admin']),
+  tourController.deleteTour
+);
 
 module.exports = router;
