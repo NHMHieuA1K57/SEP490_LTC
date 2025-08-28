@@ -1,15 +1,13 @@
-const { body, validationResult } = require("express-validator");
+const { body, validationResult } = require('express-validator');
 
 // Validation middleware
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log("Validation errors:", errors.array());
-    console.log("Request body:", req.body);
     return res.status(400).json({
       success: false,
-      message: "Dữ liệu không hợp lệ",
-      errors: errors.array(),
+      message: 'Dữ liệu không hợp lệ',
+      errors: errors.array()
     });
   }
   next();
@@ -17,264 +15,203 @@ const validate = (req, res, next) => {
 
 // Register validation rules (Updated to make role optional)
 const registerValidation = [
-  body("email")
-    .optional()
-    .isEmail()
-    .withMessage("Email không hợp lệ")
-    .normalizeEmail()
-    .isLength({ max: 255 })
-    .withMessage("Email quá dài"),
+  body('email')
+  .optional()
+  .isEmail()
+  .withMessage('Email không hợp lệ')
+  .normalizeEmail()
+  .isLength({ max: 255 })
+  .withMessage('Email quá dài'),
 
-  body("phone")
-    .optional()
-    .isMobilePhone("vi-VN")
-    .withMessage("Số điện thoại không hợp lệ"),
+body('phone')
+  .optional()
+  .isMobilePhone('vi-VN')
+  .withMessage('Số điện thoại không hợp lệ'),
 
-  body().custom((value) => {
+body()
+  .custom((value) => {
     if (!value.email && !value.phone) {
-      throw new Error("Phải nhập email hoặc số điện thoại");
+      throw new Error('Phải nhập email hoặc số điện thoại');
     }
     return true;
   }),
-  body("password")
+  body('password')
     .notEmpty()
-    .withMessage("Mật khẩu không được để trống")
+    .withMessage('Mật khẩu không được để trống')
     .isLength({ min: 6 })
-    .withMessage("Mật khẩu phải có ít nhất 6 ký tự")
+    .withMessage('Mật khẩu phải có ít nhất 6 ký tự')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage("Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số"),
+    .withMessage('Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số'),
 
-  body("name")
-    .optional()
+  body('name')
+  .optional()
     .notEmpty()
-    .withMessage("Tên không được để trống")
+    .withMessage('Tên không được để trống')
     .trim()
     .isLength({ min: 2, max: 50 })
-    .withMessage("Tên phải có từ 2-50 ký tự")
+    .withMessage('Tên phải có từ 2-50 ký tự')
     .matches(/^[a-zA-ZÀ-ỹ\s]+$/)
-    .withMessage("Tên chỉ được chứa chữ cái và khoảng trắng"),
+    .withMessage('Tên chỉ được chứa chữ cái và khoảng trắng'),
 
-  body("role")
+  body('role')
     .optional() // Make role optional
-    .isIn(["customer", "hotel_owner", "tour_provider"])
-    .withMessage("Role không hợp lệ"),
+    .isIn(['customer', 'hotel_owner', 'tour_provider'])
+    .withMessage('Role không hợp lệ'),
 
-  body("taxId") // Added for business users
+  body('taxId') // Added for business users
     .optional()
     .trim()
     .isLength({ min: 10, max: 13 })
-    .withMessage("Mã số thuế phải có từ 10-13 ký tự")
+    .withMessage('Mã số thuế phải có từ 10-13 ký tự')
     .matches(/^[0-9\-]+$/)
-    .withMessage("Mã số thuế chỉ được chứa số và dấu gạch ngang"),
+    .withMessage('Mã số thuế chỉ được chứa số và dấu gạch ngang'),
 
-  validate,
+  validate
 ];
 
 // Login validation rules
 const loginValidation = [
-  body("email")
+  body('email')
     .notEmpty()
-    .withMessage("Email không được để trống")
+    .withMessage('Email không được để trống')
     .isEmail()
     .normalizeEmail()
-    .withMessage("Email không hợp lệ"),
+    .withMessage('Email không hợp lệ'),
 
-  body("password").notEmpty().withMessage("Mật khẩu không được để trống"),
+  body('password')
+    .notEmpty()
+    .withMessage('Mật khẩu không được để trống'),
 
-  validate,
+  validate
 ];
 
 // Email verification validation rules
 const verifyEmailValidation = [
-  body("email")
+  body('email')
     .notEmpty()
-    .withMessage("Email không được để trống")
+    .withMessage('Email không được để trống')
     .isEmail()
     .normalizeEmail()
-    .withMessage("Email không hợp lệ"),
+    .withMessage('Email không hợp lệ'),
 
-  body("verificationCode")
+  body('verificationCode')
     .notEmpty()
-    .withMessage("Mã xác thực không được để trống")
+    .withMessage('Mã xác thực không được để trống')
     .isLength({ min: 6, max: 6 })
     .isNumeric()
-    .withMessage("Mã xác thực phải là 6 chữ số"),
+    .withMessage('Mã xác thực phải là 6 chữ số'),
 
-  validate,
+  validate
 ];
 
 // Resend verification validation rules
 const resendVerificationValidation = [
-  body("email")
+  body('email')
     .notEmpty()
-    .withMessage("Email không được để trống")
+    .withMessage('Email không được để trống')
     .isEmail()
     .normalizeEmail()
-    .withMessage("Email không hợp lệ"),
+    .withMessage('Email không hợp lệ'),
 
-  validate,
+  validate
 ];
 
 // Change password validation rules
 const changePasswordValidation = [
-  body("currentPassword")
+  body('currentPassword')
     .notEmpty()
-    .withMessage("Mật khẩu hiện tại không được để trống"),
+    .withMessage('Mật khẩu hiện tại không được để trống'),
 
-  body("newPassword")
+  body('newPassword')
     .notEmpty()
-    .withMessage("Mật khẩu mới không được để trống")
+    .withMessage('Mật khẩu mới không được để trống')
     .isLength({ min: 6 })
-    .withMessage("Mật khẩu mới phải có ít nhất 6 ký tự")
+    .withMessage('Mật khẩu mới phải có ít nhất 6 ký tự')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage(
-      "Mật khẩu mới phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số"
-    ),
+    .withMessage('Mật khẩu mới phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số'),
 
-  validate,
+  validate
 ];
 
 // Update profile validation rules
 const updateProfileValidation = [
-  body("name")
+  body('name')
     .optional()
     .notEmpty()
-    .withMessage("Tên không được để trống")
+    .withMessage('Tên không được để trống')
     .trim()
     .isLength({ min: 2, max: 50 })
-    .withMessage("Tên phải có từ 2-50 ký tự")
+    .withMessage('Tên phải có từ 2-50 ký tự')
     .matches(/^[a-zA-ZÀ-ỹ\s]+$/)
-    .withMessage("Tên chỉ được chứa chữ cái và khoảng trắng"),
+    .withMessage('Tên chỉ được chứa chữ cái và khoảng trắng'),
 
-  body("phone")
+  body('phone')
     .optional()
-    .isMobilePhone("vi-VN")
-    .withMessage("Số điện thoại không hợp lệ"),
+    .isMobilePhone('vi-VN')
+    .withMessage('Số điện thoại không hợp lệ'),
 
-  body("profile.address")
+  body('profile.address')
     .optional()
     .trim()
     .isLength({ max: 255 })
-    .withMessage("Địa chỉ quá dài"),
+    .withMessage('Địa chỉ quá dài'),
 
-  body("profile.dateOfBirth")
+  body('profile.dateOfBirth')
     .optional()
     .isISO8601()
-    .withMessage("Ngày sinh không hợp lệ"),
+    .withMessage('Ngày sinh không hợp lệ'),
 
-  validate,
+  validate
 ];
 
 // Forgot Password validation rules
 const forgotPasswordValidation = [
-  body("email")
+  body('email')
     .notEmpty()
-    .withMessage("Email không được để trống")
+    .withMessage('Email không được để trống')
     .isEmail()
     .normalizeEmail()
-    .withMessage("Email không hợp lệ"),
-  validate,
+    .withMessage('Email không hợp lệ'),
+  validate
 ];
 
 // Reset Password validation rules
 const resetPasswordValidation = [
-  body("email")
+  body('email')
     .notEmpty()
-    .withMessage("Email không được để trống")
+    .withMessage('Email không được để trống')
     .isEmail()
     .normalizeEmail()
-    .withMessage("Email không hợp lệ"),
-  body("resetCode")
+    .withMessage('Email không hợp lệ'),
+  body('resetCode')
     .notEmpty()
-    .withMessage("Mã đặt lại không được để trống")
+    .withMessage('Mã đặt lại không được để trống')
     .isLength({ min: 6, max: 6 })
     .isNumeric()
-    .withMessage("Mã đặt lại phải là 6 chữ số"),
-  body("newPassword")
+    .withMessage('Mã đặt lại phải là 6 chữ số'),
+  body('newPassword')
     .notEmpty()
-    .withMessage("Mật khẩu mới không được để trống")
+    .withMessage('Mật khẩu mới không được để trống')
     .isLength({ min: 6 })
-    .withMessage("Mật khẩu mới phải có ít nhất 6 ký tự")
+    .withMessage('Mật khẩu mới phải có ít nhất 6 ký tự')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage(
-      "Mật khẩu mới phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số"
-    ),
-  validate,
+    .withMessage('Mật khẩu mới phải chứa ít nhất 1 chữ hoa, 1 chữ thường và 1 số'),
+  validate
 ];
 
 // Admin Verify Business User validation rules
 const verifyBusinessValidation = [
-  body("userId")
+  body('userId')
     .notEmpty()
-    .withMessage("User ID không được để trống")
+    .withMessage('User ID không được để trống')
     .isMongoId()
-    .withMessage("User ID không hợp lệ"),
-  body("approve")
+    .withMessage('User ID không hợp lệ'),
+  body('approve')
     .notEmpty()
-    .withMessage("Trạng thái phê duyệt không được để trống")
+    .withMessage('Trạng thái phê duyệt không được để trống')
     .isBoolean()
-    .withMessage("Trạng thái phê duyệt phải là true hoặc false"),
-  validate,
-];
-
-// OTP Request validation rules
-const otpRequestValidation = [
-  body("email")
-    .notEmpty()
-    .withMessage("Email không được để trống")
-    .isEmail()
-    .normalizeEmail()
-    .withMessage("Email không hợp lệ"),
-  validate,
-];
-
-// OTP Verification validation rules
-const otpVerificationValidation = [
-  body("email")
-    .notEmpty()
-    .withMessage("Email không được để trống")
-    .isEmail()
-    .normalizeEmail()
-    .withMessage("Email không hợp lệ"),
-  body("otp")
-    .notEmpty()
-    .withMessage("OTP không được để trống")
-    .isLength({ min: 6, max: 6 })
-    .isNumeric()
-    .withMessage("OTP phải là 6 chữ số"),
-  validate,
-];
-
-// OTP Register validation rules
-const otpRegisterValidation = [
-  body("email")
-    .notEmpty()
-    .withMessage("Email không được để trống")
-    .isEmail()
-    .normalizeEmail()
-    .withMessage("Email không hợp lệ"),
-  body("otp")
-    .notEmpty()
-    .withMessage("OTP không được để trống")
-    .isLength({ min: 6, max: 6 })
-    .isNumeric()
-    .withMessage("OTP phải là 6 chữ số"),
-  body("name")
-    .optional()
-    .trim()
-    .custom((value) => {
-      if (value && value.length > 0) {
-        if (value.length < 2 || value.length > 50) {
-          throw new Error("Tên phải có từ 2-50 ký tự");
-        }
-        // Allow more characters including numbers and special characters
-        if (!/^[a-zA-ZÀ-ỹ0-9\s\-_\.]+$/.test(value)) {
-          throw new Error("Tên chứa ký tự không hợp lệ");
-        }
-      }
-      return true;
-    }),
-  validate,
+    .withMessage('Trạng thái phê duyệt phải là true hoặc false'),
+  validate
 ];
 
 module.exports = {
@@ -286,8 +223,5 @@ module.exports = {
   updateProfileValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
-  verifyBusinessValidation,
-  otpRequestValidation,
-  otpVerificationValidation,
-  otpRegisterValidation,
+  verifyBusinessValidation
 };
