@@ -1,56 +1,87 @@
-const tourService = require('../services/tourService');
+const Tour = require("../models/Tour");
 
+// Tạo tour
 exports.createTour = async (req, res) => {
   try {
-    const tour = await tourService.createTour(req.body, req.user); // tự gán providerId từ token
-    res.status(201).json({ success: true, data: tour });
+    const {
+      name, description, providerId, itinerary,
+      duration, type, serviceType, hasGuide,
+      allowPrivateBooking, price, priceAdult, priceChild,
+      availability, images, meals, hotels, transport
+    } = req.body;
+
+    // Validate serviceType liên quan đến hasGuide
+    if (serviceType === 'guided_tour' && hasGuide !== true) {
+      return res.status(400).json({ message: "Tour có hướng dẫn viên cần hasGuide = true" });
+    }
+
+    if (serviceType === 'ticket' && (!availability || availability.length === 0)) {
+      return res.status(400).json({ message: "Vé tham quan phải có ít nhất 1 ngày sử dụng" });
+    }
+
+    const tour = new Tour({
+      name, description, providerId, itinerary,
+      duration, type, serviceType, hasGuide,
+      allowPrivateBooking, price, priceAdult, priceChild,
+      availability, images, meals, hotels, transport
+    });
+
+    await tour.save();
+    res.status(201).json(tour);
   } catch (err) {
-    res.status(err.status || 400).json({ success: false, message: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
-exports.getAllTours = async (_req, res) => {
+// Lấy tất cả tour (có thể thêm filter sau)
+exports.getAllTours = async (req, res) => {
   try {
-    const tours = await tourService.getAllTours();
-    res.json({ success: true, data: tours });
+    const tours = await Tour.find();
+    res.json(tours);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
-exports.searchTours = async (req, res) => {
-  try {
-    const tours = await tourService.searchTours(req.query);
-    res.json({ success: true, data: tours });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
-
+// Lấy tour theo ID
 exports.getTourById = async (req, res) => {
   try {
-    const tour = await tourService.getTourById(req.params.id);
-    if (!tour) return res.status(404).json({ success: false, message: 'Tour not found' });
-    res.json({ success: true, data: tour });
+    const tour = await Tour.findById(req.params.id);
+    if (!tour) return res.status(404).json({ message: "Tour not found" });
+    res.json(tour);
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
+// Cập nhật tour
 exports.updateTour = async (req, res) => {
   try {
-    const tour = await tourService.updateTour(req.params.id, req.body, req.user);
-    res.json({ success: true, data: tour });
+    const updates = req.body;
+
+    // Nếu thay đổi serviceType, kiểm tra logic liên quan
+    if (updates.serviceType === 'guided_tour' && updates.hasGuide !== true) {
+      return res.status(400).json({ message: "Tour có hướng dẫn viên cần hasGuide = true" });
+    }
+
+    const tour = await Tour.findByIdAndUpdate(req.params.id, updates, { new: true });
+    if (!tour) return res.status(404).json({ message: "Tour not found" });
+    res.json(tour);
   } catch (err) {
-    res.status(err.status || 400).json({ success: false, message: err.message });
+    res.status(500).json({ error: err.message });
   }
 };
 
+// Xóa mềm tour (inactive)
 exports.deleteTour = async (req, res) => {
   try {
-    await tourService.deleteTour(req.params.id, req.user);
-    res.json({ success: true, message: 'Tour deactivated successfully' });
+    const tour = await Tour.findById(req.params.id);
+    if (!tour) return res.status(404).json({ message: "Tour not found" });
+
+    tour.status = 'inactive';
+    await tour.save();
+    res.json({ message: "Tour deactivated successfully" });
   } catch (err) {
-    res.status(err.status || 500).json({ success: false, message: err.message });
+    res.status(500).json({ error: err.message });
   }
 };

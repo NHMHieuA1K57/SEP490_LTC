@@ -1,4 +1,3 @@
-// repositories/reviewRepository.js
 const { Types } = require('mongoose');
 const Review = require('../models/Review');
 
