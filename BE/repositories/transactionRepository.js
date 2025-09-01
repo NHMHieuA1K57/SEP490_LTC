@@ -1,112 +1,112 @@
+// repositories/transactionRepository.js
 const Transaction = require('../models/Transaction');
 const User = require('../models/User');
 const Hotel = require('../models/Hotel');
 const Tour = require('../models/Tour');
 
-const findTransactionsByBusinessUserId = async (businessUserId, filters = {}) => {
-  const { startDate, endDate, status, type } = filters;
-  const query = { 'details.businessUserId': businessUserId };
-  if (status) query.status = status;
-  if (type) query.type = type;
-  if (startDate || endDate) {
-    query.createdAt = {};
-    if (startDate) query.createdAt.$gte = new Date(startDate);
-    if (endDate) query.createdAt.$lte = new Date(endDate);
+/* Helpers */
+function buildDateFilter(startDate, endDate) {
+  if (!startDate && !endDate) return undefined;
+  const f = {};
+  if (startDate) f.$gte = new Date(startDate);
+  if (endDate)   f.$lte = new Date(endDate);
+  return f;
+}
+
+class TransactionRepository {
+  /** Lịch sử giao dịch theo businessUserId (hotel_owner/tour_provider) */
+  async findTransactionsByBusinessUserId(businessUserId, filters = {}) {
+    const { startDate, endDate, status, type } = filters;
+    const query = { 'details.businessUserId': businessUserId };
+    if (status) query.status = status;
+    if (type)   query.type = type;
+    const dateFilter = buildDateFilter(startDate, endDate);
+    if (dateFilter) query.createdAt = dateFilter;
+
+    return Transaction.find(query)
+      .select('bookingId tourBookingId amount type method status transactionId createdAt details')
+      .populate('bookingId',     'totalPrice type hotelId tourId paymentInfo')
+      .populate('tourBookingId', 'totalPrice tourId customerId status')
+      .sort({ createdAt: -1 })
+      .lean();
   }
-  return await Transaction.find(query)
-    .select('bookingId amount type method status transactionId createdAt details')
-    .populate('bookingId', 'totalPrice type hotelId tourId paymentInfo')
-    .lean();
-};
-//
-const findTourTransactionsByProviderId = async (providerId, filters = {}) => {
-  const { startDate, endDate, status, type } = filters;
-  const query = { 'details.businessUserId': providerId };
-  if (status) query.status = status;
-  if (type) query.type = type;
-  if (startDate || endDate) {
-    query.createdAt = {};
-    if (startDate) query.createdAt.$gte = new Date(startDate);
-    if (endDate) query.createdAt.$lte = new Date(endDate);
+
+  /** Số dư khả dụng = tổng amount của transactions đã completed */
+  async getBalanceByBusinessUserId(businessUserId) {
+    const agg = await Transaction.aggregate([
+      { $match: { 'details.businessUserId': businessUserId, status: 'completed' } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    return agg[0]?.total || 0;
   }
 
-  const transactions = await Transaction.find(query)
-    .select('tourBookingId amount type method status transactionId createdAt details')
-    .populate('tourBookingId', 'totalPrice tourId customerId status') // tour only
-    .lean();
-
-  return transactions.map(tx => ({
-    ...tx,
-    bookingType: 'tour'
-  }));
-};
-
-const getBalanceByBusinessUserId = async (businessUserId) => {
-  const balance = await Transaction.aggregate([
-    { $match: { 'details.businessUserId': businessUserId, status: 'completed' } },
-    { $group: { _id: null, total: { $sum: '$amount' } } }
-  ]);
-  return balance[0]?.total || 0;
-};
-
-const createPayoutRequest = async (businessUserId, amount, method) => {
-  try {
-    const user = await User.findOne({ _id: businessUserId, role: { $in: ['hotel_owner', 'tour_provider'] } });
-    if (!user) {
-      throw new Error('Người dùng không tồn tại hoặc không phải đối tác kinh doanh');
-    }
-    if (!user.businessInfo.bankDetails?.accountNumber && method === 'bank_transfer') {
+  /** Tạo yêu cầu rút tiền (ghi bút toán payout âm, pending) */
+  async createPayoutRequest(businessUserId, amount, method) {
+    // xác thực đối tác + thông tin ngân hàng (nếu rút qua bank)
+    const user = await User.findOne({
+      _id: businessUserId,
+      role: { $in: ['hotel_owner', 'tour_provider'] }
+    }).lean();
+    if (!user) throw new Error('Người dùng không tồn tại hoặc không phải đối tác kinh doanh');
+    if (method === 'bank_transfer' && !user?.businessInfo?.bankDetails?.accountNumber) {
       throw new Error('Thông tin ngân hàng chưa được cung cấp');
     }
-    const balance = await getBalanceByBusinessUserId(businessUserId);
-    if (amount > balance) {
-      throw new Error('Số dư không đủ để rút');
+
+    // kiểm tra số dư khả dụng
+    const balance = await this.getBalanceByBusinessUserId(businessUserId);
+    if (amount <= 0) throw new Error('Số tiền rút phải lớn hơn 0');
+    if (amount > balance) throw new Error('Số dư không đủ để rút');
+
+    // lấy payoutPolicy theo loại đối tác
+    let payoutPolicy = 'monthly';
+    if (user.role === 'hotel_owner') {
+      const hotel = await Hotel.findOne({ ownerId: businessUserId })
+        .select('additionalInfo.payoutPolicy').lean();
+      payoutPolicy = hotel?.additionalInfo?.payoutPolicy || payoutPolicy;
+    } else if (user.role === 'tour_provider') {
+      const tour = await Tour.findOne({ providerId: businessUserId })
+        .select('additionalInfo.payoutPolicy').lean();
+      payoutPolicy = tour?.additionalInfo?.payoutPolicy || payoutPolicy;
     }
-    const hotels = await Hotel.find({ ownerId: businessUserId }).select('additionalInfo.payoutPolicy');
-    const payoutPolicy = hotels[0]?.additionalInfo?.payoutPolicy || 'monthly';
-    const transaction = new Transaction({
+
+    // ghi bút toán payout (tiền ra → âm)
+    const tx = await Transaction.create({
       userId: businessUserId,
       type: 'payout',
-      amount: -amount,
+      direction: 'out',
+      amount: -Math.abs(amount),
       method,
       status: 'pending',
-      transactionId: `PO_${Date.now()}_${businessUserId}`,
-      details: { businessUserId, commission: 0 }
+      transactionId: `PO_${Date.now()}_${businessUserId.toString()}`,
+      details: { businessUserId, commission: 0, payoutPolicy }
     });
-    await transaction.save();
-    return { payoutId: transaction._id, amount, status: 'pending', createdAt: transaction.createdAt, payoutPolicy };
-  } catch (error) {
-    throw new Error(`Lỗi khi tạo yêu cầu rút tiền: ${error.message}`);
+
+    return {
+      payoutId: tx._id,
+      amount,
+      status: tx.status,
+      createdAt: tx.createdAt,
+      payoutPolicy
+    };
   }
-};
 
-const findPayoutsByBusinessUserId = async (businessUserId) => {
-  return await Transaction.find({ 'details.businessUserId': businessUserId, type: 'payout' })
-    .select('amount method status transactionId createdAt details.completedAt')
-    .lean();
-};
+  async findPayoutsByBusinessUserId(businessUserId) {
+    return Transaction.find({ 'details.businessUserId': businessUserId, type: 'payout' })
+      .select('amount method status transactionId createdAt details.completedAt')
+      .sort({ createdAt: -1 })
+      .lean();
+  }
 
-const updateBankDetails = async (businessUserId, bankDetails) => {
-  try {
+  async updateBankDetails(businessUserId, bankDetails) {
     const user = await User.findOneAndUpdate(
       { _id: businessUserId, role: { $in: ['hotel_owner', 'tour_provider'] } },
       { $set: { 'businessInfo.bankDetails': bankDetails } },
       { new: true, runValidators: true }
     ).select('businessInfo.bankDetails');
-    if (!user) {
-      throw new Error('Người dùng không tồn tại hoặc không phải đối tác kinh doanh');
-    }
-    return user.businessInfo.bankDetails;
-  } catch (error) {
-    throw new Error(`Lỗi khi cập nhật thông tin ngân hàng: ${error.message}`);
-  }
-};
 
-module.exports = {
-  findTransactionsByBusinessUserId,
-  findTourTransactionsByProviderId,
-  getBalanceByBusinessUserId,
-  createPayoutRequest,
-  findPayoutsByBusinessUserId,
-  updateBankDetails
-};
+    if (!user) throw new Error('Người dùng không tồn tại hoặc không phải đối tác kinh doanh');
+    return user.businessInfo.bankDetails;
+  }
+}
+
+module.exports = new TransactionRepository();

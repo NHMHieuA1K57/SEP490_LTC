@@ -1,13 +1,13 @@
-const nodemailer = require('nodemailer');
-require('dotenv').config();
+const nodemailer = require("nodemailer");
+require("dotenv").config();
 
 const createTransporter = () => {
   return nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS
-    }
+      pass: process.env.EMAIL_PASS,
+    },
   });
 };
 
@@ -15,25 +15,29 @@ const createTransporter = () => {
 const sendMail = async (to, subject, html) => {
   try {
     const transporter = createTransporter();
-    
+
     const mailOptions = {
-      from: `"Local Travel Connect System" `,
+      from: `"Local Travel Connect System" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
     };
 
     const result = await transporter.sendMail(mailOptions);
-    console.log('✅ Email sent successfully:', result.messageId);
+    console.log("✅ Email sent successfully:", result.messageId);
     return { success: true, messageId: result.messageId };
   } catch (error) {
-    console.error('❌ Error sending email:', error.message);
+    console.error("❌ Error sending email:", error.message);
     return { success: false, error: error.message };
   }
 };
 
 // Template HTML cho email xác thực tài khoản
-const createAccountVerificationEmailTemplate = (otp, userName = 'Người dùng', expiryMinutes = 10) => {
+const createAccountVerificationEmailTemplate = (
+  otp,
+  userName = "Người dùng",
+  expiryMinutes = 10
+) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <h2 style="color: #2e6c80;">✅ Xác Thực Tài Khoản</h2>
@@ -88,7 +92,11 @@ const createAccountVerificationEmailTemplate = (otp, userName = 'Người dùng'
 };
 
 // Template HTML cho email quên mật khẩu
-const createForgotPasswordEmailTemplate = (otp, userName = 'Người dùng', expiryMinutes = 10) => {
+const createForgotPasswordEmailTemplate = (
+  otp,
+  userName = "Người dùng",
+  expiryMinutes = 10
+) => {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
       <h2 style="color: #2e6c80;">🔑 Đặt Lại Mật Khẩu</h2>
@@ -144,8 +152,8 @@ const createForgotPasswordEmailTemplate = (otp, userName = 'Người dùng', exp
 
 // Hàm tạo OTP ngẫu nhiên
 const generateOTP = (length = 6) => {
-  const digits = '0123456789';
-  let otp = '';
+  const digits = "0123456789";
+  let otp = "";
   for (let i = 0; i < length; i++) {
     otp += digits[Math.floor(Math.random() * digits.length)];
   }
@@ -153,35 +161,43 @@ const generateOTP = (length = 6) => {
 };
 
 // Hàm gửi OTP email
-const sendOTPEmail = async (userEmail, userName = 'Người dùng', otpLength = 6, expiryMinutes = 10, type = 'verify') => {
+const sendOTPEmail = async (
+  userEmail,
+  userName = "Người dùng",
+  otpLength = 6,
+  expiryMinutes = 10,
+  type = "verify"
+) => {
   try {
     const otp = generateOTP(otpLength);
     // Chọn template dựa trên type
-    const htmlTemplate = type === 'forgot-password' 
-      ? createForgotPasswordEmailTemplate(otp, userName, expiryMinutes)
-      : createAccountVerificationEmailTemplate(otp, userName, expiryMinutes);
-    
+    const htmlTemplate =
+      type === "forgot-password"
+        ? createForgotPasswordEmailTemplate(otp, userName, expiryMinutes)
+        : createAccountVerificationEmailTemplate(otp, userName, expiryMinutes);
+
     // Chọn tiêu đề email dựa trên type
-    const subject = type === 'forgot-password'
-      ? '🔑 Mã OTP Đặt Lại Mật Khẩu - Local Travel Connect'
-      : '✅ Mã OTP Xác Thực Tài Khoản - Local Travel Connect';
+    const subject =
+      type === "forgot-password"
+        ? "🔑 Mã OTP Đặt Lại Mật Khẩu - Local Travel Connect"
+        : "✅ Mã OTP Xác Thực Tài Khoản - Local Travel Connect";
 
     const result = await sendMail(userEmail, subject, htmlTemplate);
-    
+
     if (result.success) {
       // console.log(`✅ OTP email sent successfully to ${userEmail}`);
       // console.log(`🔑 Generated OTP: ${otp} (expires in ${expiryMinutes} minutes)`);
-      return { 
-        success: true, 
-        otp, 
+      return {
+        success: true,
+        otp,
         messageId: result.messageId,
-        expiryTime: new Date(Date.now() + expiryMinutes * 60 * 1000)
+        expiryTime: new Date(Date.now() + expiryMinutes * 60 * 1000),
       };
     } else {
       throw new Error(result.error);
     }
   } catch (error) {
-    console.error('❌ Error sending OTP email:', error.message);
+    console.error("❌ Error sending OTP email:", error.message);
     return { success: false, error: error.message };
   }
 };
