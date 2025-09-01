@@ -11,6 +11,7 @@ const adminRoutes = require("./routes/adminRoutes");
 const hotelRoutes = require("./routes/hotelRoutes");
 const transactionRoutes = require("./routes/businessUserRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const bookingHotelRoutes = require("./routes/booking");
 const paymentRoutes = require("./routes/paymentRoutes");
 const tourRoutes = require("./routes/tourRoutes");
 const bodyParser = require("body-parser");
@@ -114,6 +115,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/hotel", hotelRoutes);
 app.use("/api/transaction", transactionRoutes);
 app.use("/api/booking", bookingRoutes);
+app.use("/api/bookings", bookingHotelRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/tour", tourRoutes);
 

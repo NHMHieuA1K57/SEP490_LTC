@@ -89,12 +89,10 @@ const createBooking = async (req, res) => {
     console.log("Dữ liệu body nhận được:", req.body);
 
     if (!req.body || Object.keys(req.body).length === 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Body request không được gửi hoặc rỗng",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Body request không được gửi hoặc rỗng",
+      });
     }
 
     const bookingData = req.body;
@@ -136,12 +134,10 @@ const getCustomerBookingsHistory = async (req, res) => {
     res.status(200).json({ success: true, data: simplified });
   } catch (error) {
     console.error("Error getCustomerBookingsHistory:", error.message);
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Lỗi server khi lấy lịch sử đặt phòng",
-      });
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi lấy lịch sử đặt phòng",
+    });
   }
 };
 

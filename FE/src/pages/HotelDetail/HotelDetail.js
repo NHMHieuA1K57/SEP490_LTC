@@ -100,8 +100,8 @@ const HotelDetail = () => {
       room: "Nhà trệt (Bungalow)", // hoặc hotel.rooms[0].name nếu có dữ liệu
       roomPrice: option.discountedPrice,
       nights: 1, // có thể cho user chọn, tạm thời fix
-      checkIn: "2025-09-18",
-      checkOut: "2025-09-19",
+      checkIn: "2025-08-28",
+      checkOut: "2025-08-29",
       guests: 2,
 
       total: option.discountedPrice * 1,
