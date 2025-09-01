@@ -4,8 +4,8 @@ const tourController = require('../controllers/tourController');
 const { authMiddleware, roleMiddleware } = require('../middleware/authMiddleware');
 
 // public
-router.get('/', tourController.getAllTours);
-router.get('/search', tourController.searchTours);
+router.get('/', tourController.getAllTours);          // ?page=&limit=&sort=
+router.get('/search', tourController.searchTours);    // ?search=&type=&dateFrom=...&page=&limit=&sort=
 router.get('/:id', tourController.getTourById);
 
 // protected

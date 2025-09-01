@@ -1,16 +1,15 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
-// Messages Model: Lưu tin nhắn hỗ trợ giữa khách hàng và nhà cung cấp/admin
 const MessageSchema = new Schema({
-  senderId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  receiverId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-  bookingId: { type: Schema.Types.ObjectId, ref: 'Booking' },
-  content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  conversationId: { type: Schema.Types.ObjectId, ref: 'Conversation', required: true },
+  senderId:       { type: Schema.Types.ObjectId, ref: 'User', required: true }, // customer hoặc provider
+  text:           { type: String, trim: true },
+  attachments:    [{ url: String, name: String, mime: String, size: Number }],
+  readBy:         [{ type: Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true });
 
-// Indexes for sender and receiver queries
-MessageSchema.index({ senderId: 1, receiverId: 1 });
+MessageSchema.index({ conversationId: 1, createdAt: 1 });
+MessageSchema.index({ senderId: 1, createdAt: -1 });
 
 module.exports = mongoose.model('Message', MessageSchema);
